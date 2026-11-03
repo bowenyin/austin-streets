@@ -177,7 +177,7 @@ function fitStreet(i) {
   for (const line of state.streets[i].coords) for (const p of line) b.extend(p);
   const small = window.innerWidth <= 720;
   map.fitBounds(b, {
-    padding: small ? { top: 60, bottom: 180, left: 40, right: 40 } : 80,
+    padding: small ? { top: 40, bottom: 40, left: 32, right: 32 } : 80,
     maxZoom: 16,
     duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 800,
   });

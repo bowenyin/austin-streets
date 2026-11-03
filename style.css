@@ -375,25 +375,55 @@ h1 {
 /* ---------- small screens: bottom sheet ---------- */
 
 @media (max-width: 720px) {
-  :root { --sheet-peek: 132px; }
+  /* Phones: the guess input docks in a top bar, the map fills the middle, and the score sits in a bottom
+     sheet that peeks with just the percentage and opens on tap. */
+  :root { --topbar: 66px; --sheet-peek: 92px; }
 
-  #map, .loading { inset: 0 0 var(--sheet-peek) 0; }
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--topbar);
+    background: var(--primary);
+    border-bottom: var(--bp-hair) solid rgba(255, 255, 255, 0.08);
+  }
+
+  #map, .loading { inset: var(--topbar) 0 var(--sheet-peek) 0; }
+
+  .guess {
+    top: 10px; left: 12px; right: 12px; bottom: auto;
+    width: auto;
+    transform: none;
+    background: var(--base);
+  }
+  .guess input { font-size: 18px; padding: 11px 14px; }
+  .guess input::placeholder { font-size: 15px; }
+  .guess.shake { animation-name: shake-docked; }
+
+  .feedback {
+    top: calc(100% + 18px);
+    bottom: auto;
+    font-size: 16px;
+  }
 
   #panel {
     top: auto;
     width: 100%;
     height: 60vh;
     border-left: 0;
+    border-top: var(--bp-hair) solid rgba(255, 255, 255, 0.08);
     transform: translateY(calc(100% - var(--sheet-peek)));
     transition: transform var(--bp-dur-3) var(--bp-ease);
   }
   #panel.open { transform: none; }
 
+  /* The whole peeking strip is the toggle. */
   .sheet-handle {
     display: block;
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 28px;
+    height: var(--sheet-peek);
+    z-index: 1;
     border: 0 !important;
     background: transparent;
   }
@@ -408,22 +438,20 @@ h1 {
   }
 
   .panel-head { display: none; }
-  .score { padding: 28px 16px 14px; display: grid; grid-template-columns: auto 1fr; align-items: end; column-gap: 12px; }
+  .score { padding: 24px 16px 14px; display: grid; grid-template-columns: auto 1fr; align-items: baseline; column-gap: 12px; }
   .score-pct { font-size: 38px; }
-  .score-caption { margin: 0 0 4px; }
+  .score-caption { margin: 0; }
   .score-row { grid-column: 1 / -1; }
+  #panel:not(.open) .score-row { visibility: hidden; }
   .list-head, #list li, .empty, .panel-foot { padding-left: 16px; padding-right: 16px; }
 
   .maplibregl-ctrl-bottom-right, .maplibregl-ctrl-scale { display: none; }
-  .maplibregl-ctrl-bottom-left { top: 0; bottom: auto; }
+}
 
-  .guess {
-    left: 50%;
-    bottom: calc(var(--sheet-peek) + 16px);
-    width: calc(100vw - 32px);
-  }
-  .guess input { font-size: 22px; padding: 14px 16px; }
-  .guess input::placeholder { font-size: 17px; }
+@keyframes shake-docked {
+  0%, 100% { transform: none; }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
