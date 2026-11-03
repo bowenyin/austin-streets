@@ -76,7 +76,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 
 h1 {
-  margin: var(--bp-2) 0 0;
+  margin: 0;
   font-family: var(--bp-display);
   font-size: 25px;
   font-weight: 700;
@@ -105,10 +105,10 @@ h1 {
   margin: var(--bp-5) 0 0;
   border-top: var(--bp-hair) solid var(--bp-rule-soft);
 }
-.score-row > div { padding-top: var(--bp-4); }
+.score-row > div { padding-top: var(--bp-4); display: flex; flex-direction: column-reverse; justify-content: flex-end; }
 .score-row > div + div { border-left: var(--bp-hair) solid var(--bp-rule-soft); padding-left: var(--bp-4); }
 .score-row dt { font-size: 12.5px; color: var(--bp-ink-3); }
-.score-row dd { margin: 2px 0 0; font-size: 19px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.score-row dd { margin: 0 0 2px; font-size: 19px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 /* ---------- list ---------- */
 
