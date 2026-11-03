@@ -7,6 +7,9 @@ const AUSTIN_BOUNDS = [[-97.94, 30.098], [-97.56, 30.517]];
 const MAX_BOUNDS = [[-98.2, 29.92], [-97.3, 30.7]];
 const MIN_ZOOM = 8.5;
 const MAX_ZOOM = 17;
+// The starting view zooms this far past fitting the whole city, centered on central Austin.
+const START_ZOOM_IN = 0.6;
+const START_CENTER = [-97.745, 30.29];
 const SCALE = 1e5;
 
 const $ = (id) => document.getElementById(id);
@@ -457,6 +460,7 @@ async function start() {
 
   map.resize();
   map.fitBounds(AUSTIN_BOUNDS, { padding: 24, animate: false });
+  map.jumpTo({ center: START_CENTER, zoom: map.getZoom() + START_ZOOM_IN });
   addLayers(background);
   bindMapHover();
   bindUI();
