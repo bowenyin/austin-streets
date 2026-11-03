@@ -6,6 +6,10 @@ const DIRECTIONS = new Set([
   'N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW',
 ]);
 
+const DIRECTION_WORDS = {
+  N: 'NORTH', S: 'SOUTH', E: 'EAST', W: 'WEST', NE: 'NORTHEAST', NW: 'NORTHWEST', SE: 'SOUTHEAST', SW: 'SOUTHWEST',
+};
+
 const SUFFIXES = new Set([
   'STREET', 'ST', 'AVENUE', 'AVE', 'AV', 'BOULEVARD', 'BLVD', 'DRIVE', 'DR', 'ROAD', 'RD',
   'LANE', 'LN', 'COURT', 'CT', 'CIRCLE', 'CIR', 'COVE', 'CV', 'TRAIL', 'TRL', 'PARKWAY', 'PKWY',
@@ -50,6 +54,10 @@ function tokens(str) {
   return str.split(' ').filter(Boolean);
 }
 
+// A leading direction is part of the name when a street-type word follows it ("West Avenue", "North Loop Blvd").
+const isLeadingDirection = (t) =>
+  t.length > 1 && DIRECTIONS.has(t[0].toUpperCase()) && !SUFFIXES.has(t[1].toUpperCase());
+
 export function normalize(name) {
   if (!name) return '';
   let s = name.toUpperCase()
@@ -64,8 +72,9 @@ export function normalize(name) {
   }
 
   let t = tokens(s);
+  if (DIRECTION_WORDS[t[0]]) t[0] = DIRECTION_WORDS[t[0]];
   if (t.length > 1 && DIRECTIONS.has(t[t.length - 1])) t.pop();
-  if (t.length > 1 && DIRECTIONS.has(t[0])) t.shift();
+  if (isLeadingDirection(t)) t.shift();
   if (t.length > 1 && SUFFIXES.has(t[t.length - 1])) t.pop();
   if (t.length > 1 && (t[t.length - 1] === 'JR' || t[t.length - 1] === 'JUNIOR')) t.pop();
   if (t[0] === 'ST' && t.length > 1) t[0] = 'SAINT';
@@ -88,7 +97,7 @@ export function displayName(name) {
     s = s.replace(re, '');
   }
   const t = tokens(s);
-  if (t.length > 1 && DIRECTIONS.has(t[0].toUpperCase())) t.shift();
+  if (isLeadingDirection(t)) t.shift();
   return t.join(' ');
 }
 
@@ -97,6 +106,12 @@ export function candidateKeys(input) {
   const key = normalize(input);
   if (!key) return [];
   const keys = [key];
+  // "North Loop" may be the whole name (North Loop Blvd) or a street named North; try the whole name first.
+  const words = tokens(input.toUpperCase().replace(/[^A-Z0-9 ]+/g, ' '));
+  if (words.length === 2 && DIRECTIONS.has(words[0]) && SUFFIXES.has(words[1])) {
+    keys.unshift((DIRECTION_WORDS[words[0]] || words[0]) + words[1]);
+    keys.push(normalize(words[1]));
+  }
   if (/^\d+$/.test(key)) {
     const n = Number(key);
     const rem100 = n % 100;
