@@ -93,7 +93,7 @@ function addLayers(background) {
     type: 'geojson',
     data: { type: 'FeatureCollection', features: state.streets.map((_, i) => feature(i)) },
   });
-  map.addSource('named', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  map.addSource('named', { type: 'geojson', data: { type: 'FeatureCollection', features: [] }, tolerance: 0.2 });
 
   map.addLayer({
     id: 'parks', type: 'fill', source: 'background', filter: ['==', ['get', 'kind'], 'park'],
@@ -133,8 +133,9 @@ function addLayers(background) {
       'text-font': ['Open Sans Semibold'],
       'text-size': 13,
       'symbol-placement': 'line',
-      'symbol-spacing': 320,
-      'text-padding': 2,
+      'symbol-spacing': 180,
+      'text-padding': 1,
+      'text-max-angle': 60,
     },
     paint: {
       'text-color': css('--bp-ink'),

@@ -132,6 +132,45 @@ function clipLine(line, contains) {
   return runs;
 }
 
+// Joins lines that share an endpoint into longer continuous lines, so labels have room to fit.
+function mergeLines(lines) {
+  const key = (p) => p[0].toFixed(6) + ',' + p[1].toFixed(6);
+  const pending = new Set(lines.map((l) => l.slice()));
+  const byEnd = new Map();
+  const index = (line) => {
+    for (const k of [key(line[0]), key(line[line.length - 1])]) {
+      if (!byEnd.has(k)) byEnd.set(k, new Set());
+      byEnd.get(k).add(line);
+    }
+  };
+  const unindex = (line) => {
+    for (const k of [key(line[0]), key(line[line.length - 1])]) byEnd.get(k)?.delete(line);
+  };
+  pending.forEach(index);
+
+  const merged = [];
+  for (const start of lines.length ? [...pending] : []) {
+    if (!pending.has(start)) continue;
+    pending.delete(start);
+    unindex(start);
+    let line = start;
+    for (const atEnd of [true, false]) {
+      for (;;) {
+        const k = key(atEnd ? line[line.length - 1] : line[0]);
+        const next = [...(byEnd.get(k) || [])][0];
+        if (!next) break;
+        pending.delete(next);
+        unindex(next);
+        const startsHere = key(next[0]) === k;
+        if (atEnd) line = line.concat((startsHere ? next : next.slice().reverse()).slice(1));
+        else line = (startsHere ? next.slice().reverse() : next).concat(line.slice(1));
+      }
+    }
+    merged.push(line);
+  }
+  return merged;
+}
+
 const round = (line, digits) => line.map(([x, y]) => [+x.toFixed(digits), +y.toFixed(digits)]);
 
 // Delta-encodes a line as a flat array of integers at 1e-5 degree precision.
@@ -209,7 +248,7 @@ for (const [key, g] of groups) {
     k: key,
     d: display,
     m: +g.miles.toFixed(4),
-    g: g.lines.map((l) => encodeLine(simplify(l, 0.00004))).filter((l) => l.length >= 4),
+    g: mergeLines(g.lines).map((l) => encodeLine(simplify(l, 0.00004))).filter((l) => l.length >= 4),
   });
 }
 streets.sort((a, b) => b.m - a.m);
