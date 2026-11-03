@@ -54,9 +54,12 @@ function tokens(str) {
   return str.split(' ').filter(Boolean);
 }
 
-// A leading direction is part of the name when a street-type word follows it ("West Avenue", "North Loop Blvd").
-const isLeadingDirection = (t) =>
-  t.length > 1 && DIRECTIONS.has(t[0].toUpperCase()) && !SUFFIXES.has(t[1].toUpperCase());
+// A leading direction is part of the name when a street-type word follows it ("West Avenue", "North Loop Blvd"),
+// unless the rest is a route number ("West Highway 71").
+const isLeadingDirection = (t) => {
+  if (t.length < 2 || !DIRECTIONS.has(t[0].toUpperCase())) return false;
+  return !SUFFIXES.has(t[1].toUpperCase()) || HIGHWAY_PREFIX.test(t.slice(1).join(' ').toUpperCase());
+};
 
 export function normalize(name) {
   if (!name) return '';
