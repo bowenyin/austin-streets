@@ -51,6 +51,7 @@ const ALIASES = {
 
 // Route numbers that also name the local roads they run along; typing the number names all of them.
 export const ROUTE_GROUPS = {
+  '35': ['35', 'PURPLEHEART'],
   '183': ['183', 'RESEARCH', 'EDBLUESTEIN', 'BERGSTROM', 'BASTROP'],
   '71': ['71', 'BENWHITE', 'BASTROP'],
 };

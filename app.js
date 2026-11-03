@@ -336,8 +336,7 @@ function bindUI() {
     const li = e.target.closest('li');
     if (!li) return;
     fitStreet(Number(li.dataset.id));
-    els.panel.classList.remove('open');
-    els.sheetToggle.setAttribute('aria-expanded', 'false');
+    setPanelOpen(false);
   });
 
   els.reset.addEventListener('click', () => {
@@ -353,10 +352,19 @@ function bindUI() {
     render();
   });
 
-  els.sheetToggle.addEventListener('click', () => {
-    const open = els.panel.classList.toggle('open');
-    els.sheetToggle.setAttribute('aria-expanded', String(open));
+  els.sheetToggle.addEventListener('click', () => setPanelOpen(!els.panel.classList.contains('open')));
+
+  // On phones, a tap anywhere outside the expanded stats panel collapses it.
+  document.addEventListener('pointerdown', (e) => {
+    if (els.panel.classList.contains('open') && !els.panel.contains(e.target) && !e.target.closest('dialog')) {
+      setPanelOpen(false);
+    }
   });
+}
+
+function setPanelOpen(open) {
+  els.panel.classList.toggle('open', open);
+  els.sheetToggle.setAttribute('aria-expanded', String(open));
 }
 
 // ---------- transfer ----------
