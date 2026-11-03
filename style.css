@@ -159,12 +159,10 @@ h1 {
 .panel-foot {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: var(--bp-4) var(--bp-6);
   color: var(--bp-ink-2);
 }
-.toggle { display: flex; align-items: center; gap: var(--bp-2); cursor: pointer; }
-.toggle input { accent-color: var(--secondary); margin: 0; width: 16px; height: 16px; }
 
 .ghost {
   border: var(--bp-hair) solid var(--bp-rule-hard);

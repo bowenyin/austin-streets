@@ -10,7 +10,7 @@ const els = {
   pct: $('pct'), totalMi: $('total-mi'), count: $('count'), miles: $('miles'),
   list: $('list'), empty: $('empty'), input: $('guess-input'), form: $('guess'),
   feedback: $('feedback'), tooltip: $('tooltip'), loading: $('loading'),
-  labels: $('labels-toggle'), reset: $('reset'), panel: $('panel'), sheetToggle: $('sheet-toggle'),
+  reset: $('reset'), panel: $('panel'), sheetToggle: $('sheet-toggle'),
   transfer: $('transfer'), dialog: $('transfer-dialog'), copyLink: $('copy-link'), copyCode: $('copy-code'),
   restoreInput: $('restore-input'), restore: $('restore'), transferStatus: $('transfer-status'),
   resetDialog: $('reset-dialog'),
@@ -314,10 +314,6 @@ function bindUI() {
     fitStreet(Number(li.dataset.id));
     els.panel.classList.remove('open');
     els.sheetToggle.setAttribute('aria-expanded', 'false');
-  });
-
-  els.labels.addEventListener('change', () => {
-    map.setLayoutProperty('named-labels', 'visibility', els.labels.checked ? 'visible' : 'none');
   });
 
   els.reset.addEventListener('click', () => {
