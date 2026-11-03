@@ -24,3 +24,11 @@ node scripts/build-data.mjs
 ```
 
 `normalize.js` turns names into matching keys and is shared by the build script and the game. It drops directional prefixes, street-type suffixes, and route designations, so "S Lamar Blvd", "Lamar", "I-35", and "IH 35" all match. Divided highways count at half length so both carriageways aren't double-counted.
+
+## Map label font
+
+Map labels use Inter Medium, served as MapLibre glyph files from `fonts/Inter Medium/` (Inter is under the SIL Open Font License; see `fonts/Inter-LICENSE.txt`). To regenerate them from `Inter-Medium.ttf` in the [Inter release](https://github.com/rsms/inter/releases):
+
+```bash
+npx -p fontnik@0.7.7 node scripts/build-glyphs.cjs Inter-Medium.ttf "fonts/Inter Medium"
+```

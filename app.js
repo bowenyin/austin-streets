@@ -75,7 +75,7 @@ const map = new maplibregl.Map({
   pitchWithRotate: false,
   style: {
     version: 8,
-    glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+    glyphs: location.href.replace(/[?#].*$/, '').replace(/[^/]*$/, '') + 'fonts/{fontstack}/{range}.pbf',
     sources: {},
     layers: [{ id: 'land', type: 'background', paint: { 'background-color': css('--bp-map-land') } }],
   },
@@ -133,7 +133,7 @@ function addLayers(background) {
     id: 'named-labels', type: 'symbol', source: 'named', minzoom: 12,
     layout: {
       'text-field': ['get', 'name'],
-      'text-font': ['Open Sans Semibold'],
+      'text-font': ['Inter Medium'],
       'text-size': 13,
       'symbol-placement': 'line',
       'symbol-spacing': 180,
