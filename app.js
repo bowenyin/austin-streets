@@ -77,7 +77,7 @@ const map = new maplibregl.Map({
     version: 8,
     glyphs: location.href.replace(/[?#].*$/, '').replace(/[^/]*$/, '') + 'fonts/{fontstack}/{range}.pbf',
     sources: {},
-    layers: [{ id: 'land', type: 'background', paint: { 'background-color': css('--bp-map-land') } }],
+    layers: [{ id: 'land', type: 'background', paint: { 'background-color': css('--base') } }],
   },
 });
 map.touchZoomRotate.disableRotation();
@@ -90,7 +90,7 @@ map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom
 map.addControl(new maplibregl.ScaleControl({ unit: 'imperial' }), 'bottom-left');
 
 function addLayers(background) {
-  const accent = css('--bp-accent');
+  const accent = css('--secondary');
   map.addSource('background', { type: 'geojson', data: background });
   map.addSource('streets', {
     type: 'geojson',
@@ -100,26 +100,26 @@ function addLayers(background) {
 
   map.addLayer({
     id: 'parks', type: 'fill', source: 'background', filter: ['==', ['get', 'kind'], 'park'],
-    paint: { 'fill-color': css('--bp-map-park') },
+    paint: { 'fill-color': css('--park') },
   });
   map.addLayer({
     id: 'water', type: 'fill', source: 'background', filter: ['==', ['get', 'kind'], 'water'],
-    paint: { 'fill-color': css('--bp-map-water') },
+    paint: { 'fill-color': css('--water') },
   });
   map.addLayer({
     id: 'boundary', type: 'line', source: 'background', filter: ['==', ['get', 'kind'], 'boundary'],
-    paint: { 'line-color': '#3A4048', 'line-width': 1, 'line-dasharray': [3, 3] },
+    paint: { 'line-color': css('--boundary'), 'line-width': 1, 'line-dasharray': [3, 3] },
   });
   map.addLayer({
     id: 'streets', type: 'line', source: 'streets',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': '#3E454C', 'line-width': lineWidth(0.6, 1.4, 6) },
+    paint: { 'line-color': css('--street'), 'line-width': lineWidth(0.6, 1.4, 6) },
   });
   map.addLayer({
     id: 'named-hover', type: 'line', source: 'named',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
     paint: {
-      'line-color': css('--bp-ink'),
+      'line-color': '#FFFFFF',
       'line-width': lineWidth(3, 7, 24),
       'line-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 1, 0],
     },
@@ -141,8 +141,8 @@ function addLayers(background) {
       'text-max-angle': 60,
     },
     paint: {
-      'text-color': css('--bp-ink'),
-      'text-halo-color': css('--bp-map-land'),
+      'text-color': '#FFFFFF',
+      'text-halo-color': css('--base'),
       'text-halo-width': 1.5,
     },
   });
@@ -441,6 +441,7 @@ async function start() {
   await restoreFromHash();
 
   els.loading.hidden = true;
+  if (window.innerWidth <= 720) els.input.placeholder = 'Name an Austin street';
   els.input.disabled = false;
   if (window.innerWidth > 720) els.input.focus();
 }
