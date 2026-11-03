@@ -443,7 +443,6 @@ async function start() {
   await restoreFromHash();
 
   els.loading.hidden = true;
-  if (window.innerWidth <= 720) els.input.placeholder = 'Name an Austin street';
   els.input.disabled = false;
   if (window.innerWidth > 720) els.input.focus();
 }
