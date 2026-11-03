@@ -4,6 +4,10 @@ How much of Austin's street network can you name from memory? Type a street name
 
 Inspired by [Name SF Streets](https://carvin.github.io/sf-street-names/).
 
+## Analytics
+
+`index.html` loads Vercel Web Analytics from `/_vercel/insights/script.js`. Enable Web Analytics in the project's Vercel dashboard; the script only exists on Vercel deployments, so it 404s harmlessly when running locally.
+
 ## Run locally
 
 ```bash
