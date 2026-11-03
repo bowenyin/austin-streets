@@ -1,4 +1,4 @@
-import { candidateKeys } from './normalize.js';
+import { candidateKeys, ROUTE_GROUPS } from './normalize.js';
 import { encodeProgress, decodeProgress } from './progress-code.js';
 
 const STORAGE_KEY = 'austin-streets:named';
@@ -263,25 +263,39 @@ function shake() {
 
 // ---------- guessing ----------
 
+// Streets a guess names: a route group's roads, or the first matching street.
+function matchGuess(text) {
+  for (const key of candidateKeys(text)) {
+    if (ROUTE_GROUPS[key]) {
+      return { route: key, matches: ROUTE_GROUPS[key].map((k) => state.byKey.get(k)).filter((i) => i !== undefined) };
+    }
+    if (state.byKey.has(key)) return { route: null, matches: [state.byKey.get(key)] };
+  }
+  return { route: null, matches: [] };
+}
+
 function submitGuess(text) {
   if (!text.trim()) return;
-  const idx = candidateKeys(text).map((k) => state.byKey.get(k)).find((i) => i !== undefined);
-  if (idx === undefined) {
+  const { route, matches } = matchGuess(text);
+  if (!matches.length) {
     shake();
     flash('No Austin street by that name');
     return;
   }
   els.input.value = '';
-  if (state.named.includes(idx)) {
-    flash(`Already named ${state.streets[idx].d}`);
-    setHover(idx);
+  const fresh = matches.filter((i) => !state.named.includes(i));
+  if (!fresh.length) {
+    flash(`Already named ${route ? 'every road along ' + route : state.streets[matches[0]].d}`);
+    setHover(matches[0]);
     return;
   }
-  state.named.push(idx);
+  state.named.push(...fresh);
   save();
   render();
+  const gained = fmtShare(fresh.reduce((sum, i) => sum + share(i), 0));
+  const label = fresh.length === 1 ? state.streets[fresh[0]].d : `${fresh.length} roads along ${route}`;
   const done = state.named.length === state.streets.length;
-  flash(done ? 'Every street in Austin, named.' : `${state.streets[idx].d}  +${fmtShare(share(idx))}`);
+  flash(done ? 'Every street in Austin, named.' : `${label}  +${gained}`);
 }
 
 function bindUI() {

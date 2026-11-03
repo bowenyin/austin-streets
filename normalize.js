@@ -50,6 +50,12 @@ const ALIASES = {
   IH35: '35', I35: '35',
 };
 
+// Route numbers that also name the local roads they run along; typing the number names all of them.
+export const ROUTE_GROUPS = {
+  '183': ['183', 'RESEARCH', 'EDBLUESTEIN', 'BERGSTROM', 'BASTROP'],
+  '71': ['71', 'BENWHITE', 'BASTROP'],
+};
+
 function tokens(str) {
   return str.split(' ').filter(Boolean);
 }
