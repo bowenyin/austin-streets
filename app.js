@@ -127,7 +127,7 @@ function addLayers(background) {
     paint: { 'line-color': accent, 'line-width': lineWidth(1, 3, 14) },
   });
   map.addLayer({
-    id: 'named-labels', type: 'symbol', source: 'named',
+    id: 'named-labels', type: 'symbol', source: 'named', minzoom: 12,
     layout: {
       'text-field': ['get', 'name'],
       'text-font': ['Open Sans Semibold'],
