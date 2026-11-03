@@ -3,6 +3,10 @@ import { encodeProgress, decodeProgress } from './progress-code.js';
 
 const STORAGE_KEY = 'austin-streets:named';
 const AUSTIN_BOUNDS = [[-97.94, 30.098], [-97.56, 30.517]];
+// Panning stops a margin beyond the city limits; zoom stops at roughly a single block.
+const MAX_BOUNDS = [[-98.2, 29.92], [-97.3, 30.7]];
+const MIN_ZOOM = 8.5;
+const MAX_ZOOM = 17;
 const SCALE = 1e5;
 
 const $ = (id) => document.getElementById(id);
@@ -72,6 +76,9 @@ const map = new maplibregl.Map({
   container: 'map',
   bounds: AUSTIN_BOUNDS,
   fitBoundsOptions: { padding: 24 },
+  maxBounds: MAX_BOUNDS,
+  minZoom: MIN_ZOOM,
+  maxZoom: MAX_ZOOM,
   attributionControl: false,
   dragRotate: false,
   pitchWithRotate: false,
