@@ -375,23 +375,27 @@ h1 {
 /* ---------- small screens: bottom sheet ---------- */
 
 @media (max-width: 720px) {
-  /* Phones: the guess input docks in a top bar, the map fills the middle, and the score sits in a bottom
-     sheet that peeks with just the percentage and opens on tap. */
-  :root { --topbar: 66px; --sheet-peek: 92px; }
+  /* Phones: the score is a strip at the top that drops down to show stats and the list; the guess input is
+     a bar at the bottom that rides above the on-screen keyboard (--kb, set from the visual viewport). */
+  :root { --sheet-peek: 72px; --bottombar: 66px; --kb: 0px; }
 
   body::before {
     content: "";
     position: fixed;
-    top: 0; left: 0; right: 0;
-    height: var(--topbar);
+    left: 0; right: 0;
+    bottom: var(--kb);
+    height: var(--bottombar);
+    z-index: 1;
     background: var(--primary);
-    border-bottom: var(--bp-hair) solid rgba(255, 255, 255, 0.08);
+    border-top: var(--bp-hair) solid rgba(255, 255, 255, 0.08);
   }
 
-  #map, .loading { inset: var(--topbar) 0 var(--sheet-peek) 0; }
+  #map, .loading { inset: var(--sheet-peek) 0 var(--bottombar) 0; }
 
   .guess {
-    top: 10px; left: 12px; right: 12px; bottom: auto;
+    top: auto; left: 12px; right: 12px;
+    bottom: calc(var(--kb) + 10px);
+    z-index: 3;
     width: auto;
     transform: none;
     background: var(--base);
@@ -399,25 +403,21 @@ h1 {
   .guess input { font-size: 18px; padding: 11px 14px; }
   .guess input::placeholder { font-size: 15px; }
   .guess.shake { animation-name: shake-docked; }
-
-  .feedback {
-    top: calc(100% + 18px);
-    bottom: auto;
-    font-size: 16px;
-  }
+  .feedback { font-size: 16px; }
 
   #panel {
-    top: auto;
+    top: 0; bottom: auto;
     width: 100%;
-    height: 60vh;
+    height: var(--sheet-peek);
+    overflow: hidden;
     border-left: 0;
-    border-top: var(--bp-hair) solid rgba(255, 255, 255, 0.08);
-    transform: translateY(calc(100% - var(--sheet-peek)));
-    transition: transform var(--bp-dur-3) var(--bp-ease);
+    border-bottom: var(--bp-hair) solid rgba(255, 255, 255, 0.08);
+    z-index: 2;
+    transition: height var(--bp-dur-3) var(--bp-ease);
   }
-  #panel.open { transform: none; }
+  #panel.open { height: min(70vh, calc(100% - var(--bottombar) - var(--kb) - 16px)); }
 
-  /* The whole peeking strip is the toggle. */
+  /* The score strip is the toggle; the grabber sits on the panel's lower edge. */
   .sheet-handle {
     display: block;
     position: absolute;
@@ -427,10 +427,10 @@ h1 {
     border: 0 !important;
     background: transparent;
   }
-  .sheet-handle::after {
+  #panel::after {
     content: "";
     position: absolute;
-    top: 8px; left: 50%;
+    bottom: 6px; left: 50%;
     width: 36px; height: 4px;
     margin-left: -18px;
     border-radius: 2px;
@@ -438,14 +438,23 @@ h1 {
   }
 
   .panel-head { display: none; }
-  .score { padding: 24px 16px 14px; display: grid; grid-template-columns: auto 1fr; align-items: baseline; column-gap: 12px; }
-  .score-pct { font-size: 38px; }
+  .score {
+    flex-shrink: 0;
+    padding: 12px 16px 16px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
+    column-gap: 12px;
+  }
+  .score-pct { font-size: 36px; }
   .score-caption { margin: 0; }
   .score-row { grid-column: 1 / -1; }
   #panel:not(.open) .score-row { visibility: hidden; }
+  .panel-foot { padding-bottom: 20px; }
   .list-head, #list li, .empty, .panel-foot { padding-left: 16px; padding-right: 16px; }
 
   .maplibregl-ctrl-bottom-right, .maplibregl-ctrl-scale { display: none; }
+  .maplibregl-ctrl-bottom-left { top: 0; bottom: auto; }
 }
 
 @keyframes shake-docked {
