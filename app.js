@@ -124,14 +124,14 @@ function addLayers(background) {
   map.addLayer({
     id: 'named', type: 'line', source: 'named',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': accent, 'line-width': lineWidth(0.8, 2.5, 12) },
+    paint: { 'line-color': accent, 'line-width': lineWidth(1, 3, 14) },
   });
   map.addLayer({
     id: 'named-labels', type: 'symbol', source: 'named',
     layout: {
       'text-field': ['get', 'name'],
       'text-font': ['Open Sans Semibold'],
-      'text-size': 11,
+      'text-size': 13,
       'symbol-placement': 'line',
       'symbol-spacing': 320,
       'text-padding': 2,
