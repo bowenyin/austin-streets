@@ -377,7 +377,7 @@ h1 {
 @media (max-width: 720px) {
   /* Phones: the score is a strip at the top that drops down to show stats and the list; the guess input is
      a bar at the bottom that rides above the on-screen keyboard (--kb, set from the visual viewport). */
-  :root { --sheet-peek: 72px; --bottombar: 66px; --kb: 0px; --vv-top: 0px; --vv-height: 100vh; }
+  :root { --sheet-peek: 80px; --bottombar: 66px; --kb: 0px; --vv-top: 0px; --vv-height: 100vh; }
 
   body::before {
     content: "";
@@ -440,7 +440,7 @@ h1 {
   .panel-head { display: none; }
   .score {
     flex-shrink: 0;
-    padding: 12px 16px 16px;
+    padding: 20px 16px 16px;
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: baseline;
