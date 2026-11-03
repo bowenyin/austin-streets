@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en" data-bp-voice="grotesque" data-bp-surface="carbon" style="--bp-accent:#F07A2E">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Name Austin Streets</title>
+    <meta name="description" content="What share of Austin's street network can you name from memory?">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+    <link href="blueprint.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="map" aria-label="Map of Austin streets"></div>
+
+    <aside id="panel" aria-label="Score and named streets">
+      <button id="sheet-toggle" class="sheet-handle" aria-label="Show named streets" aria-expanded="false"></button>
+      <header class="panel-head">
+        <p class="eyebrow">Austin, Texas</p>
+        <h1>Name Austin Streets</h1>
+      </header>
+
+      <section class="score" aria-live="polite">
+        <div class="score-pct"><span id="pct">0</span><span class="unit">%</span></div>
+        <p class="score-caption">of <span id="total-mi">—</span> mi of streets named</p>
+        <dl class="score-row">
+          <div><dt>Streets</dt><dd id="count">0</dd></div>
+          <div><dt>Miles</dt><dd id="miles">0.0</dd></div>
+        </dl>
+      </section>
+
+      <section class="list-section">
+        <div class="list-head">
+          <h2 class="eyebrow">Named</h2>
+          <div class="segmented" role="tablist" aria-label="Sort named streets">
+            <button role="tab" data-sort="found" aria-selected="true">Recent</button>
+            <button role="tab" data-sort="alpha" aria-selected="false">A–Z</button>
+            <button role="tab" data-sort="length" aria-selected="false">Length</button>
+          </div>
+        </div>
+        <ol id="list"></ol>
+        <p id="empty" class="empty">Streets you name will appear here.</p>
+      </section>
+
+      <footer class="panel-foot">
+        <label class="toggle"><input type="checkbox" id="labels-toggle" checked> Street labels</label>
+        <button id="reset" class="ghost">Reset</button>
+      </footer>
+    </aside>
+
+    <form id="guess" class="guess bp-lift" autocomplete="off">
+      <input id="guess-input" type="text" placeholder="Type an Austin street and press Return" aria-label="Street name"
+             autocapitalize="words" spellcheck="false" enterkeyhint="go" disabled>
+      <p id="feedback" class="feedback" role="status"></p>
+    </form>
+
+    <div id="tooltip" class="tooltip" hidden></div>
+    <div id="loading" class="loading">Loading streets…</div>
+
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,1308 @@
+/* ============================================================================
+   blueprint — design tokens
+   Source of truth. Copy into <project>/src/styles/blueprint.css.
+
+   Per project you change exactly three things:
+     1. --bp-accent  (+ its two derivatives)
+     2. data-bp-voice   = "grotesque" | "editorial"
+     3. data-bp-surface = "paper" | "carbon"
+
+   <html data-bp-voice="grotesque" data-bp-surface="paper">
+   ========================================================================== */
+
+:root {
+  /* --- ACCENT — the one per-project variable -------------------------------
+     Set --bp-accent. Set --bp-accent-ink to a darkened version that clears
+     4.5:1 against --bp-paper (accent is rarely legible as text at full chroma).
+     Set --bp-accent-on to the ink color that sits ON a filled accent block.
+     See reference/accent.md for verified pairs.                             */
+  --bp-accent:      #16151A;              /* default: no accent, ink-on-ink   */
+  --bp-accent-ink:  var(--bp-accent);     /* accent for text / links          */
+  --bp-accent-on:   #FFFFFF;              /* text sitting on filled accent    */
+  --bp-accent-wash: color-mix(in srgb, var(--bp-accent) 10%, transparent);
+  --bp-accent-edge: color-mix(in srgb, var(--bp-accent) 35%, transparent);
+
+  /* --- TYPE FAMILIES ------------------------------------------------------ */
+  --bp-font-grotesque: "Inter Tight", "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --bp-font-serif:     "Instrument Serif", "Newsreader", "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --bp-font-body:      "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --bp-font-mono:      "Geist Mono", "JetBrains Mono", "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Resolved by [data-bp-voice] below. Never reference the families directly. */
+  --bp-display: var(--bp-font-grotesque);
+  --bp-text:    var(--bp-font-body);
+  --bp-mono:    var(--bp-font-mono);
+
+  /* --- TYPE SCALE · landing ----------------------------------------------- */
+  --bp-t-display:   clamp(2.75rem, 7vw, 6.5rem);   /* 44 → 104 */
+  --bp-t-h1:        clamp(2rem, 4.6vw, 3.75rem);   /* 32 → 60  */
+  --bp-t-h2:        clamp(1.6rem, 3vw, 2.5rem);    /* 26 → 40  */
+  --bp-t-h3:        1.375rem;                      /* 22 */
+  --bp-t-lead:      1.1875rem;                     /* 19 */
+  --bp-t-body:      1rem;                          /* 16 */
+  --bp-t-sm:        0.875rem;                      /* 14 */
+  --bp-t-label:     0.6875rem;                     /* 11 — mono only */
+
+  --bp-lh-display:  0.94;
+  --bp-lh-head:     1.06;
+  --bp-lh-body:     1.6;
+
+  /* Display tracking. Untracked large sans is the #1 generated-page tell. */
+  --bp-tr-display:  -0.035em;
+  --bp-tr-head:     -0.02em;
+  --bp-tr-body:      0em;
+  --bp-tr-label:     0.10em;   /* mono labels, uppercase */
+  --bp-tr-label-lg:  0.14em;   /* tickers, wide-set strips */
+
+  --bp-w-display:   500;
+  --bp-w-head:      500;
+  --bp-w-body:      400;
+  --bp-w-strong:    500;       /* 600+ reads shouty in this system */
+  --bp-w-label:     500;
+
+  --bp-measure:     68ch;      /* body copy max line length */
+
+  /* --- TYPE SCALE · dashboard --------------------------------------------- */
+  --bp-d-title:     1.375rem;  /* 22 — page title */
+  --bp-d-h:         0.9375rem; /* 15 — card heading */
+  --bp-d-base:      0.8125rem; /* 13 — table + body */
+  --bp-d-sm:        0.75rem;   /* 12 — secondary */
+  --bp-d-xs:        0.6875rem; /* 11 — section labels, column heads */
+  --bp-d-lh:        1.45;
+
+  /* --- SPACE — 4px base ---------------------------------------------------- */
+  --bp-1:  0.25rem;  --bp-2:  0.5rem;   --bp-3:  0.75rem;  --bp-4: 1rem;
+  --bp-5:  1.25rem;  --bp-6:  1.5rem;   --bp-8:  2rem;     --bp-10: 2.5rem;
+  --bp-12: 3rem;     --bp-16: 4rem;     --bp-20: 5rem;     --bp-24: 6rem;
+  --bp-32: 8rem;     --bp-40: 10rem;
+
+  --bp-section-y:   clamp(4rem, 9vw, 10rem);   /* landing section rhythm  */
+  --bp-d-section-y: var(--bp-8);               /* dashboard section rhythm */
+  --bp-gutter:      clamp(1.25rem, 4vw, 3.5rem);
+  --bp-maxw:        84rem;   /* 1344 */
+  --bp-maxw-text:   46rem;   /* editorial column */
+
+  /* --- SHAPE --------------------------------------------------------------- */
+  --bp-r-0: 0;
+  --bp-r-1: 2px;    /* landing chrome: buttons, chips, inputs */
+  --bp-r-2: 6px;    /* dashboard controls */
+  --bp-r-3: 8px;    /* dashboard cards */
+  --bp-chamfer: 10px;  /* Greptile-style angled corner, see .bp-chamfer */
+
+  --bp-hair: 1px;   /* the only border width in the system */
+
+  /* --- MOTION -------------------------------------------------------------- */
+  --bp-ease:     cubic-bezier(0.22, 1, 0.36, 1);  /* the house curve, out-quint */
+  --bp-ease-out: cubic-bezier(0, 0, 0.2, 1);      /* entering from off-screen   */
+  --bp-ease-io:  cubic-bezier(0.4, 0, 0.2, 1);    /* moves and stops on-screen  */
+  --bp-dur-0:  70ms;   /* press feedback — snaps down, settles back up on release */
+  --bp-dur-1: 120ms;   /* the DEFAULT for every interactive state change         */
+  --bp-dur-2: 180ms;   /* composite hover · theme switching                     */
+  --bp-dur-3: 320ms;   /* disclosure · image zoom inside a fixed window          */
+  --bp-dur-4: 560ms;   /* entrance                                              */
+  --bp-dur:   var(--bp-dur-1);   /* deprecated alias — kept so existing projects
+                                    referencing var(--bp-dur) keep working      */
+
+  /* --- LATTICE ------------------------------------------------------------- */
+  --bp-modules: 12;    /* module columns between the rails                      */
+  --bp-feather: 16px;  /* how far a plate texture fades before its edge         */
+
+  /* Texture pitch is a SUBMULTIPLE OF THE MODULE, so texture lines land on
+     rails instead of drifting across them. A fixed 16px pitch against a
+     102px module never aligns — that is what makes a grid read as wallpaper.
+     JS overrides --bp-module-w with the measured plate width for exactness;
+     this vw expression is the no-JS fallback (off by a scrollbar at most).   */
+  --bp-module-w: calc((100vw - 2 * var(--bp-gutter)) / var(--bp-modules));
+  --bp-tex-pitch: calc(var(--bp-module-w) / 4);
+  --bp-rivet-inset: 10px;
+
+  /* Pressed is derived from each component's OWN hover color rather than a
+     shared wash — a wash flattens the surface tints the palette was built
+     with (--bp-inset is a cool #EDF0F3; a neutral ink wash reads as a lighter
+     pure gray). One knob controls how far a press moves toward the ink.      */
+  --bp-press-mix: 92%;
+
+  /* Hardware marks. Applied as masks so they tint from --bp-hw.               */
+  --bp-mark-cross: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='11' height='11'><path d='M5.5 .5v10M.5 5.5h10' stroke='%23000' stroke-width='1'/></svg>");
+  --bp-mark-plus:  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='29' height='11'><path d='M14.5 2.5v6M11.5 5.5h6' stroke='%23000' stroke-width='1'/></svg>");
+}
+
+/* ============================================================================
+   VOICE
+   ========================================================================== */
+
+[data-bp-voice="grotesque"] {
+  --bp-display: var(--bp-font-grotesque);
+  --bp-text:    var(--bp-font-body);
+}
+
+[data-bp-voice="editorial"] {
+  --bp-display: var(--bp-font-serif);
+  --bp-text:    var(--bp-font-serif);
+  --bp-tr-display: -0.015em;   /* serifs need far less negative tracking */
+  --bp-tr-head:    -0.008em;
+  --bp-lh-display: 1.04;
+  --bp-lh-head:    1.15;
+  --bp-lh-body:    1.62;
+  --bp-w-display:  400;
+  --bp-w-head:     400;
+  --bp-t-lead:     1.25rem;    /* 20 — serif body wants a size bump */
+  --bp-t-body:     1.0625rem;  /* 17 */
+}
+
+/* ============================================================================
+   SURFACE
+
+   Three palettes, chosen by attribute:
+     paper    warm off-white — landings
+     console  cool near-white — anything people work in
+     carbon   true black — dark, for either register
+
+   `data-bp-surface` is REQUIRED. Without it no palette applies, and the page
+   renders unstyled — that is deliberate, so a missing attribute fails loudly
+   rather than silently picking one.
+
+   To follow the system theme, set data-bp-surface="auto" plus, optionally,
+   data-bp-light to name the light palette (defaults to paper). A three-line
+   resolver swaps it for a real value before first paint:
+
+     <script>
+     (function(){var d=document.documentElement,m=matchMedia('(prefers-color-scheme:dark)');
+       function pick(){ if(d.dataset.bpSurface!=='auto'&&d.__bpAuto!==1) return;
+         d.__bpAuto=1; d.dataset.bpSurface=m.matches?'carbon':(d.dataset.bpLight||'paper'); }
+       pick(); m.addEventListener('change',pick);
+     })();
+     </script>
+
+   This is JS rather than a media query on purpose: expressing it in CSS means
+   duplicating a 29-token palette inside @media (prefers-color-scheme: dark),
+   which is two places to update forever. Put the script inline in <head>,
+   before any stylesheet link, so there is no flash. Explicit surfaces need no
+   JS at all.
+   ========================================================================== */
+
+[data-bp-surface="paper"] {
+  --bp-paper:     #F5F4F1;   /* page field — never #FFF */
+  --bp-panel:     #FAFAF8;   /* raised cell */
+  --bp-panel-2:   #FFFFFF;   /* data surface: tables, chart plots */
+  --bp-inset:     #EFEDE9;   /* recessed strip, ticker, announcement bar */
+
+  --bp-ink:       #16151A;   /* headings + body — never #000 */
+  --bp-ink-2:     #5C5B63;   /* secondary copy */
+  --bp-ink-3:     #6F6E77;   /* mono labels + captions — 11px text, so ≥4.5:1 */
+  --bp-ornament:  #A9A7AD;   /* decoration ONLY: crop marks, grid, leader lines.
+                                Never carries text a user must read.           */
+  --bp-ink-inv:   #FAFAF8;   /* text on inverted blocks */
+
+  /* Two rule weights, deliberately. A line that reads correctly as a divider
+     inside a white card is invisible as structure on the paper field. Verified:
+     --bp-rule is 1.40:1 on paper, --bp-rule-soft is 1.28:1 on white.          */
+  --bp-rule:      #D5D0C7;   /* structural — full-bleed bands, cell grids */
+  --bp-rule-soft: #E6E3DC;   /* interior — dividers inside a card or table */
+  --bp-rule-hard: #B3ADA1;   /* emphasis rule, crop marks, input borders */
+
+  /* Interaction fills. Each surface declares its own ramp so hover always moves
+     AWAY from the resting surface — darker on light, lighter on dark. Reusing
+     --bp-inset or --bp-panel for this fails on carbon, where both are recessed
+     (darker than the panel they sit on): correct for a field strip, backwards
+     for a hover. Press derives from these by mixing toward --bp-ink, which is
+     already surface-correct because ink flips with the surface.
+       1 subtle  ghost button · table row · segmented
+       2 medium  toolbar · rail · menu · map control
+       3 strong  sidebar nav                                                  */
+  --bp-hover-1:   #FAFAF8;
+  --bp-hover-2:   #EFEDE9;
+  --bp-hover-3:   #E6E3DC;
+  --bp-grid:      #80808012;  /* 7% neutral — alpha so one value serves both surfaces */
+  --bp-hw:        var(--bp-ornament);        /* hardware: rivets, crosshairs, ticks */
+  --bp-invert:    #16151A;   /* filled/inverted cell background */
+  --bp-lift:      rgba(22, 21, 26, 0.13);   /* hard-offset lift, see .bp-lift */
+
+  --bp-ok:        #1E7F4B;
+  --bp-warn:      #8F5B00;
+  --bp-bad:       #C0392B;
+  --bp-ok-wash:   #1E7F4B1F;
+  --bp-warn-wash: #A66A001F;
+  --bp-bad-wash:  #C0392B1F;
+
+  color-scheme: light;
+}
+
+[data-bp-surface="carbon"] {
+  --bp-paper:     #000000;   /* true black is correct here — Render's move */
+  --bp-panel:     #0B0B0C;
+  --bp-panel-2:   #131315;
+  --bp-inset:     #08080A;
+
+  --bp-ink:       #F5F5F4;
+  --bp-ink-2:     #A1A1A6;
+  --bp-ink-3:     #8A8A92;   /* ≥4.5:1 on black at 11px */
+  --bp-ornament:  #55555C;   /* decoration only */
+  --bp-ink-inv:   #0B0B0C;
+
+  --bp-rule:      #2A2A2E;   /* structural — 1.47:1 on black */
+  --bp-rule-soft: #2E2E34;   /* interior — must be LIGHTER than --bp-panel-2,
+                                not darker, or dividers vanish inside cards */
+  --bp-rule-hard: #43434A;   /* emphasis */
+
+  /* Lighter than --bp-panel-2 (#131315), ascending. R=G with blue lifted +3/+4/+7,
+     matching this palette's own grays (which are all R=G, blue +2..+7). Do not
+     retune these to the light surfaces' hue — see motion.md. */
+  --bp-hover-1:   #1C1C1F;
+  --bp-hover-2:   #26262A;
+  --bp-hover-3:   #33333A;
+  --bp-grid:      #8080801f;  /* same hue, more alpha to survive black */
+  --bp-hw:        var(--bp-ornament);
+  --bp-invert:    #F5F5F4;
+  --bp-lift:      rgba(0, 0, 0, 0.55);
+
+  --bp-ok:        #35C77B;
+  --bp-warn:      #E0A030;
+  --bp-bad:       #F2685C;
+  --bp-ok-wash:   #35C77B24;
+  --bp-warn-wash: #E0A03024;
+  --bp-bad-wash:  #F2685C24;
+
+  --bp-accent-on: #000000;   /* saturated accents on black want dark text */
+  color-scheme: dark;
+}
+
+/* Cool functional surface. Landings keep warm `paper`; anything people work in
+   uses this. Beige + rounded cards is the combination that reads as generated. */
+[data-bp-surface="console"] {
+  --bp-paper:     #F4F6F8;   /* workspace / canvas gutter */
+  --bp-panel:     #FAFBFC;
+  --bp-panel-2:   #FFFFFF;   /* panels, rows, data surfaces */
+  --bp-inset:     #EDF0F3;   /* field strips, active segments */
+
+  --bp-ink:       #121820;
+  --bp-ink-2:     #566070;
+  --bp-ink-3:     #676F7D;   /* ≥4.5:1 — sets 11–12px text */
+  --bp-ornament:  #A7AFBA;   /* decoration only */
+  --bp-ink-inv:   #F7F9FA;
+
+  --bp-rule:      #CBD2DA;   /* structural — ~1.41:1 on the workspace */
+  --bp-rule-soft: #E0E5EA;   /* interior — ~1.27:1 on white */
+  --bp-rule-hard: #AEB6C0;
+
+  /* Unchanged from the values these components already used. */
+  --bp-hover-1:   #FAFBFC;
+  --bp-hover-2:   #EDF0F3;
+  --bp-hover-3:   #E0E5EA;
+  --bp-grid:      #80808012;
+  --bp-invert:    #1B2027;
+  --bp-lift:      rgba(18, 24, 32, 0.13);
+
+  --bp-ok:        #1E7F4B;
+  --bp-warn:      #8F5B00;
+  --bp-bad:       #C0392B;
+  --bp-ok-wash:   #1E7F4B1F;
+  --bp-warn-wash: #8F5B001F;
+  --bp-bad-wash:  #C0392B1F;
+
+  color-scheme: light;
+}
+
+/* ============================================================================
+   BASE
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Any class that sets `display` beats the UA's [hidden] rule, which silently
+   breaks every show/hide in the system. Restore it once, globally. */
+[hidden] { display: none !important; }
+
+/* Nothing snaps. Every interactive surface gets the default 120ms on the four
+   properties that are allowed to change — never on transform, size or layout.
+   Components override the duration; they rarely need to override the list. */
+a, button, summary, label, select, input, textarea,
+[role="button"], [role="tab"], [role="option"], [tabindex]:not([tabindex="-1"]),
+tr, .bp-cell, .bp-plate, .bp-row, .bp-chip, .bp-block, .bp-swatch, .bp-bubble {
+  transition:
+    background-color var(--bp-dur-1) var(--bp-ease),
+    border-color     var(--bp-dur-1) var(--bp-ease),
+    color            var(--bp-dur-1) var(--bp-ease),
+    opacity          var(--bp-dur-1) var(--bp-ease),
+    filter           var(--bp-dur-1) var(--bp-ease);
+}
+/* Press reads as immediate on the way down and settles on release. */
+a:active, button:active, [role="button"]:active, [role="tab"]:active,
+.bp-block:active, .bp-swatch:active,
+tr:is([tabindex],[role="button"],[role="link"]):active {
+  transition-duration: var(--bp-dur-0);
+}
+
+body {
+  margin: 0;
+  background: var(--bp-paper);
+  color: var(--bp-ink);
+  font-family: var(--bp-text);
+  font-size: var(--bp-t-body);
+  line-height: var(--bp-lh-body);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern" 1;
+  /* Turn the browser's own tap flash off. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3 {
+  font-family: var(--bp-display);
+  font-weight: var(--bp-w-head);
+  letter-spacing: var(--bp-tr-head);
+  line-height: var(--bp-lh-head);
+  margin: 0;
+  text-wrap: balance;
+}
+
+p { max-width: var(--bp-measure); margin: 0; }
+
+/* Tabular numerals everywhere a number can change or be compared. */
+table, .bp-num, [data-num] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+:focus-visible {
+  outline: 2px solid var(--bp-accent-ink);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   PRIMITIVES
+   ========================================================================== */
+
+/* --- Display headline ----------------------------------------------------- */
+.bp-display {
+  font-family: var(--bp-display);
+  font-size: var(--bp-t-display);
+  font-weight: var(--bp-w-display);
+  letter-spacing: var(--bp-tr-display);
+  line-height: var(--bp-lh-display);
+  text-wrap: balance;
+}
+
+/* --- Mono micro-label — LANDING DECORATION ONLY ---------------------------
+   Mono frames content; it never is content. Product surfaces (dashboards,
+   consoles, tables, maps) use the text face throughout — tabular-nums gives
+   column alignment without the costume. The override below means dropping a
+   landing primitive into a console degrades correctly instead of reintroducing
+   monospace by accident. ------------------------------------------------- */
+.bp-label {
+  font-family: var(--bp-mono);
+  font-size: var(--bp-t-label);
+  font-weight: var(--bp-w-label);
+  letter-spacing: var(--bp-tr-label);
+  text-transform: uppercase;
+  color: var(--bp-ink-3);
+  line-height: 1;
+}
+.bp-label--wide { letter-spacing: var(--bp-tr-label-lg); }
+.bp-label--ink  { color: var(--bp-ink); }
+
+/* [ BRACKETED ] — brackets are drawn, not typed, so spacing stays even */
+.bp-label--bracket::before { content: "[ "; opacity: 0.55; }
+.bp-label--bracket::after  { content: " ]"; opacity: 0.55; }
+
+/* Landing decoration degrades to the text face inside any functional shell. */
+.bp-dense .bp-label, .bp-shell .bp-label, .bp-panel .bp-label, .bp-map .bp-label,
+.bp-dense .bp-btn--text, .bp-shell .bp-btn--text {
+  font-family: var(--bp-text); letter-spacing: 0.06em;
+}
+
+/* --- The hairline cell — panels are table cells, never floating cards ----- */
+.bp-cell {
+  background: var(--bp-panel);
+  border: var(--bp-hair) solid var(--bp-rule);
+  border-radius: var(--bp-r-0);
+  position: relative;
+}
+/* Collapse shared borders when cells tile into a grid. */
+.bp-grid-cells { display: grid; gap: 0; }
+.bp-grid-cells > .bp-cell { margin: calc(var(--bp-hair) * -1) 0 0 calc(var(--bp-hair) * -1); }
+
+/* --- Full-bleed structural rule ------------------------------------------- */
+.bp-rule-x {
+  border: 0;
+  border-top: var(--bp-hair) solid var(--bp-rule);
+  margin: 0;
+  width: 100%;
+}
+
+/* ============================================================================
+   LATTICE — rails, plates, textures, hardware
+   The grid is the layout engine. See reference/grid.md.
+   ========================================================================== */
+
+/* The lattice loses modules rather than squeezing them. --bp-module-w is
+   derived from this, so anything reading it must divide by the CURRENT count,
+   never a hardcoded 12. */
+@media (max-width: 899px) { :root { --bp-modules: 8; } }
+@media (max-width: 599px) { :root { --bp-modules: 4; } }
+
+/* --- The page grid. Rails and content share ONE named-line template, so
+       alignment is structural rather than eyeballed. --------------------- */
+.bp-page {
+  display: grid;
+  grid-template-columns:
+    [bleed-start] var(--bp-gutter)
+    [rail-l plate-start] repeat(var(--bp-modules), minmax(0, 1fr))
+    [plate-end rail-r] var(--bp-gutter)
+    [bleed-end];
+}
+.bp-page > *         { grid-column: plate; }
+/* The lattice must span the full bleed. If it inherits `grid-column: plate`
+   above, its containing block becomes the plate area and every rail lands one
+   gutter inboard of the content it is supposed to align to. */
+.bp-page > .bp-bleed,
+.bp-page > .bp-lattice { grid-column: bleed; }
+
+/* Rails: an overlay reusing the identical template, so its lines land exactly
+   on the module lines the content is already using. */
+.bp-lattice {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  display: grid;
+  grid-template-columns: inherit;
+}
+.bp-lattice > i { border-left: var(--bp-hair) solid var(--bp-rule); }
+.bp-lattice > i:last-child { border-right: var(--bp-hair) solid var(--bp-rule); }
+
+/* --- Plate: a cell snapped to the lattice ------------------------------- */
+.bp-plate { position: relative; }
+.bp-plate--ruled  { border: var(--bp-hair) solid var(--bp-rule); }
+.bp-plate--dashed { border: var(--bp-hair) dashed var(--bp-rule-hard); }
+.bp-plate--filled { background: var(--bp-panel-2); }
+
+/* --- Texture: a property of a PLATE, never of the page.
+       The 16px mask feather is what makes it belong to the plate instead of
+       reading as wallpaper clipped by a box. ------------------------------ */
+.bp-tex { position: relative; isolation: isolate; }
+.bp-tex::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: -1;
+  background-image:
+    linear-gradient(to right,  var(--bp-grid) var(--bp-hair), transparent var(--bp-hair)),
+    linear-gradient(to bottom, var(--bp-grid) var(--bp-hair), transparent var(--bp-hair));
+  background-size: var(--bp-tex-pitch) var(--bp-tex-pitch);
+  -webkit-mask-image:
+    linear-gradient(to right,  transparent, #000 var(--bp-feather), #000 calc(100% - var(--bp-feather)), transparent),
+    linear-gradient(to bottom, transparent, #000 var(--bp-feather), #000 calc(100% - var(--bp-feather)), transparent);
+  mask-image:
+    linear-gradient(to right,  transparent, #000 var(--bp-feather), #000 calc(100% - var(--bp-feather)), transparent),
+    linear-gradient(to bottom, transparent, #000 var(--bp-feather), #000 calc(100% - var(--bp-feather)), transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+/* Structural textures — module-derived, so they align to the lattice. */
+.bp-tex--coarse { --bp-tex-pitch: calc(var(--bp-module-w) / 2); }
+.bp-tex--graph  { --bp-tex-pitch: calc(var(--bp-module-w) / 4); }
+.bp-tex--dense  { --bp-tex-pitch: calc(var(--bp-module-w) / 8); }
+
+/* Tonal textures — sub-perceptual or diagonal, so alignment does not apply.
+   Never use one where the reader could mistake it for a structural grid. */
+.bp-tex--fine   { --bp-tex-pitch: 2px; }
+.bp-tex--dot::before {
+  background-image: radial-gradient(var(--bp-grid) 1px, transparent 1px);
+  background-size: var(--bp-tex-pitch) var(--bp-tex-pitch);
+}
+
+/* --- Hardware ----------------------------------------------------------- */
+
+/* Rivet: 3px dot at each corner, inset. "This plate is mounted." */
+.bp-rivets { position: relative; }
+.bp-rivets::after {
+  content: ""; position: absolute; inset: var(--bp-rivet-inset);
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, var(--bp-hw) 1.5px, transparent 1.75px),
+    radial-gradient(circle, var(--bp-hw) 1.5px, transparent 1.75px),
+    radial-gradient(circle, var(--bp-hw) 1.5px, transparent 1.75px),
+    radial-gradient(circle, var(--bp-hw) 1.5px, transparent 1.75px);
+  background-size: 4px 4px;
+  background-repeat: no-repeat;
+  background-position: left top, right top, left bottom, right bottom;
+  transition: opacity var(--bp-dur-1) var(--bp-ease);
+}
+
+/* Crosshair: + centered ON each corner. "This plate is selected." */
+.bp-cross { position: relative; }
+.bp-cross::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: var(--bp-hw);
+  -webkit-mask-image: var(--bp-mark-cross), var(--bp-mark-cross), var(--bp-mark-cross), var(--bp-mark-cross);
+  mask-image: var(--bp-mark-cross), var(--bp-mark-cross), var(--bp-mark-cross), var(--bp-mark-cross);
+  -webkit-mask-size: 11px 11px; mask-size: 11px 11px;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: left -5.5px top -5.5px, right -5.5px top -5.5px, left -5.5px bottom -5.5px, right -5.5px bottom -5.5px;
+  mask-position: left -5.5px top -5.5px, right -5.5px top -5.5px, left -5.5px bottom -5.5px, right -5.5px bottom -5.5px;
+}
+
+/* Handle: L-bracket at each corner. Heavier selection. */
+.bp-handles { position: relative; }
+.bp-handles::after {
+  content: ""; position: absolute; inset: calc(var(--bp-hair) * -1);
+  pointer-events: none; --hl: 14px; --ht: 1.5px;
+  background-image:
+    linear-gradient(var(--bp-hw), var(--bp-hw)), linear-gradient(var(--bp-hw), var(--bp-hw)),
+    linear-gradient(var(--bp-hw), var(--bp-hw)), linear-gradient(var(--bp-hw), var(--bp-hw)),
+    linear-gradient(var(--bp-hw), var(--bp-hw)), linear-gradient(var(--bp-hw), var(--bp-hw)),
+    linear-gradient(var(--bp-hw), var(--bp-hw)), linear-gradient(var(--bp-hw), var(--bp-hw));
+  background-repeat: no-repeat;
+  background-size:
+    var(--hl) var(--ht), var(--ht) var(--hl), var(--hl) var(--ht), var(--ht) var(--hl),
+    var(--hl) var(--ht), var(--ht) var(--hl), var(--hl) var(--ht), var(--ht) var(--hl);
+  background-position:
+    left top, left top, right top, right top,
+    left bottom, left bottom, right bottom, right bottom;
+}
+
+/* Plus-rule: a divider drawn as repeating + marks. */
+.bp-rule-plus {
+  height: 11px; border: 0; margin: 0; background: var(--bp-hw);
+  flex: 1 1 auto; min-width: 0;   /* an <hr> in a flex row collapses to 0 without this */
+  -webkit-mask-image: var(--bp-mark-plus); mask-image: var(--bp-mark-plus);
+  -webkit-mask-size: 29px 11px; mask-size: 29px 11px;
+  -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
+}
+/* Label interrupting a plus-rule */
+.bp-rule-plus-row { display: flex; align-items: center; gap: var(--bp-4); }
+.bp-rule-plus-row > .bp-rule-plus { flex: 1; }
+
+/* Mount: dashed inner frame holding a figure. Dashed = measurement. */
+.bp-mount {
+  position: relative;
+  margin: var(--bp-feather);
+  border: var(--bp-hair) dashed var(--bp-rule-hard);
+}
+
+/* Dog-ear: a folded top-left corner. "This plate is a document." */
+.bp-dogear { --bp-ear: 56px; position: relative;
+  clip-path: polygon(var(--bp-ear) 0, 100% 0, 100% 100%, 0 100%, 0 var(--bp-ear)); }
+.bp-dogear::after {
+  content: ""; position: absolute; top: 0; left: 0;
+  width: var(--bp-ear); height: var(--bp-ear); pointer-events: none;
+  background: color-mix(in srgb, #fff 42%, transparent);
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+}
+
+/* --- Crop marks — solid corner squares pinned to a panel ------------------ */
+.bp-cropped { position: relative; }
+.bp-cropped::before, .bp-cropped::after,
+.bp-cropped > .bp-crop-b::before, .bp-cropped > .bp-crop-b::after {
+  content: ""; position: absolute; width: 6px; height: 6px;
+  background: var(--bp-ornament); pointer-events: none;
+}
+.bp-cropped::before { top: -3px; left: -3px; }
+.bp-cropped::after  { top: -3px; right: -3px; }
+.bp-cropped > .bp-crop-b { position: absolute; inset: 0; pointer-events: none; }
+.bp-cropped > .bp-crop-b::before { bottom: -3px; left: -3px; }
+.bp-cropped > .bp-crop-b::after  { bottom: -3px; right: -3px; }
+
+/* --- Buttons -------------------------------------------------------------- */
+.bp-btn {
+  display: inline-flex; align-items: center; gap: var(--bp-2);
+  font-family: var(--bp-text);
+  font-size: var(--bp-t-sm);
+  font-weight: var(--bp-w-strong);
+  letter-spacing: -0.005em;
+  padding: 0.6875rem var(--bp-5);
+  border: var(--bp-hair) solid transparent;
+  border-radius: var(--bp-r-1);
+  cursor: pointer;
+  transition: background-color var(--bp-dur-1) var(--bp-ease),
+              border-color   var(--bp-dur-1) var(--bp-ease),
+              color          var(--bp-dur-1) var(--bp-ease);
+}
+.bp-btn--primary {                                  /* the ONE accent CTA */
+  background: var(--bp-accent); color: var(--bp-accent-on);
+}
+@media (hover: hover) { .bp-btn--primary:hover { background: color-mix(in srgb, var(--bp-accent) 88%, var(--bp-ink)); } }
+.bp-btn--primary:active { background: color-mix(in srgb, var(--bp-accent) 76%, var(--bp-ink)); }
+
+.bp-btn--solid  { background: var(--bp-invert); color: var(--bp-ink-inv); }  /* black CTA */
+@media (hover: hover) { .bp-btn--solid:hover { background: color-mix(in srgb, var(--bp-invert) 86%, var(--bp-paper)); } }
+.bp-btn--solid:active { background: color-mix(in srgb, var(--bp-invert) 74%, var(--bp-paper)); }
+
+.bp-btn--ghost  { background: transparent; color: var(--bp-ink); border-color: var(--bp-rule-hard); }
+@media (hover: hover) { .bp-btn--ghost:hover { background: var(--bp-hover-1); border-color: var(--bp-ink-3); } }
+.bp-btn--ghost:active { background: color-mix(in srgb, var(--bp-hover-1) var(--bp-press-mix), var(--bp-ink));
+                        border-color: var(--bp-ink-2); }
+
+/* Text CTA with a corner arrow — the reference set's most-used link form */
+.bp-btn--text {
+  padding: 0; background: none; border: 0;
+  font-family: var(--bp-mono); font-size: var(--bp-t-label);
+  letter-spacing: var(--bp-tr-label); text-transform: uppercase;
+  color: var(--bp-ink); text-decoration: none;
+}
+.bp-btn--text::after { content: "↗"; opacity: 0.55; }
+@media (hover: hover) { .bp-btn--text:hover::after { opacity: 1; } }
+.bp-btn--text:active { opacity: .62; }
+
+/* Arrow in its own ruled compartment — Outtake's button */
+.bp-btn__arrow {
+  display: inline-flex; align-items: center; justify-content: center;
+  margin: -0.6875rem -1.25rem -0.6875rem var(--bp-4);
+  padding-inline: var(--bp-3); align-self: stretch;
+  border-left: var(--bp-hair) solid currentColor;
+  opacity: 0.35;
+}
+
+/* Chamfered corners — use in place of radius when a project wants edge */
+.bp-chamfer {
+  border-radius: 0;
+  clip-path: polygon(
+    var(--bp-chamfer) 0, 100% 0, 100% calc(100% - var(--bp-chamfer)),
+    calc(100% - var(--bp-chamfer)) 100%, 0 100%, 0 var(--bp-chamfer));
+}
+
+/* --- Chip / badge --------------------------------------------------------- */
+/* Sentence case, sans. An uppercase mono chip reads as a costume — uppercase
+   is reserved for section headers. */
+.bp-chip {
+  display: inline-flex; align-items: center; gap: var(--bp-2);
+  font-family: var(--bp-text); font-size: 0.78125rem; /* 12.5 */
+  letter-spacing: 0; text-transform: none;
+  padding: 0.1875rem var(--bp-2);
+  border: var(--bp-hair) solid var(--bp-rule);
+  border-radius: var(--bp-r-1);
+  color: var(--bp-ink-2); background: var(--bp-panel);
+}
+.bp-chip--ok  { color: var(--bp-ok);  border-color: transparent; background: var(--bp-ok-wash); }
+.bp-chip--bad { color: var(--bp-bad); border-color: transparent; background: var(--bp-bad-wash); }
+
+/* --- Highlight swatch behind headline words (Extend) ----------------------
+   A flat background fills the whole em box, which at display sizes reads as a
+   blocky slab. Clip it to roughly cap-height with a hard-stop gradient so it
+   hugs the text the way a marker would.                                      */
+.bp-mark {
+  background-image: linear-gradient(
+    to bottom,
+    transparent 16%,
+    var(--bp-accent-wash) 16%,
+    var(--bp-accent-wash) 92%,
+    transparent 92%);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding-inline: 0.1em;
+  margin-inline: -0.1em;
+}
+
+/* ============================================================================
+   DASHBOARD DENSITY
+   Scope with <div class="bp-dense"> or on the app shell root.
+   ========================================================================== */
+
+.bp-dense {
+  font-size: var(--bp-d-base);
+  line-height: var(--bp-d-lh);
+  --bp-r-1: var(--bp-r-1);   /* 2px — functional surfaces do not round */
+}
+.bp-dense .bp-cell {
+  background: var(--bp-panel-2);
+  border-radius: var(--bp-r-1);
+}
+.bp-dense .bp-btn { padding: 0.375rem var(--bp-3); font-size: var(--bp-d-sm); border-radius: var(--bp-r-1); }
+
+/* Section label — the dashboard's only ornament */
+.bp-dense .bp-section-label {
+  font-family: var(--bp-text); font-size: var(--bp-d-xs); font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--bp-ink); margin-bottom: var(--bp-3);
+}
+
+/* Table: hairline row rules, no zebra, no vertical rules, ever */
+.bp-table { width: 100%; border-collapse: collapse; font-size: var(--bp-d-base); }
+.bp-table th {
+  text-align: left; font-family: var(--bp-text); font-size: var(--bp-d-xs);
+  font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--bp-ink-3);
+  padding: var(--bp-2) var(--bp-3); border-bottom: var(--bp-hair) solid var(--bp-rule);
+}
+.bp-table td {
+  padding: var(--bp-3); border-bottom: var(--bp-hair) solid var(--bp-rule-soft);
+  vertical-align: middle;
+}
+.bp-table tbody tr:last-child td { border-bottom: 0; }
+/* Only rows that actually do something get states. A pressed row that leads
+   nowhere reads as a broken control. The selector doubles as the keyboard
+   requirement: an operable row needs tabindex or a role anyway. */
+@media (hover: hover) {
+  .bp-table tbody tr:is([tabindex],[role="button"],[role="link"]):hover {
+    background: var(--bp-hover-1); cursor: pointer; }
+}
+.bp-table tbody tr:is([tabindex],[role="button"],[role="link"]):active {
+  background: color-mix(in srgb, var(--bp-hover-1) var(--bp-press-mix), var(--bp-ink)); }
+.bp-table .bp-num { text-align: right; font-family: var(--bp-text); font-variant-numeric: tabular-nums; }
+
+/* Sidebar nav */
+.bp-nav-group { font-family: var(--bp-text); font-size: var(--bp-d-xs); font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--bp-ink-3); padding: var(--bp-4) var(--bp-3) var(--bp-2); }
+.bp-nav-item {
+  display: flex; align-items: center; gap: var(--bp-3);
+  padding: var(--bp-2) var(--bp-3); border-radius: var(--bp-r-1);
+  color: var(--bp-ink-2); text-decoration: none;
+  transition: background-color var(--bp-dur-1) var(--bp-ease);
+}
+@media (hover: hover) { .bp-nav-item:hover { background: var(--bp-hover-3); } }
+.bp-nav-item:active { background: color-mix(in srgb, var(--bp-hover-3) var(--bp-press-mix), var(--bp-ink)); }
+/* Active = neutral fill. Never the accent, never a left bar. */
+.bp-nav-item[aria-current] { background: var(--bp-rule-soft); color: var(--bp-ink); font-weight: var(--bp-w-strong); }
+
+/* Selection marker: flush to the edge, full height. Never inset or rounded. */
+.bp-selectable { position: relative; }
+.bp-selectable:is([aria-current],[aria-selected="true"])::before {
+  content: ""; position: absolute; inset-block: 0; inset-inline-start: 0;
+  width: 3px; background: currentColor;
+}
+
+/* Truncated identifiers */
+.bp-id { font-family: var(--bp-text); font-variant-numeric: tabular-nums; font-size: var(--bp-d-sm); color: var(--bp-ink-2);
+  max-width: 18ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ============================================================================
+   INTERACTION
+   The plate never leaves the lattice. A hover may change what a plate looks
+   like; it may not change where it sits. See reference/motion.md.
+   ========================================================================== */
+
+/* Border wake — the default for any interactive plate */
+.bp-hov-edge { transition: border-color var(--bp-dur-1) var(--bp-ease); }
+@media (hover: hover) { .bp-hov-edge:hover { border-color: var(--bp-rule-hard); } }
+.bp-hov-edge:active { border-color: var(--bp-ink-3); }
+
+/* Fill wake */
+.bp-hov-fill { transition: background-color var(--bp-dur-1) var(--bp-ease); }
+@media (hover: hover) { .bp-hov-fill:hover { background: var(--bp-hover-1); } }
+.bp-hov-fill:active { background: color-mix(in srgb, var(--bp-hover-1) var(--bp-press-mix), var(--bp-ink)); }
+
+/* Registration nudge — 2px, never with a shadow */
+.bp-hov-nudge { transition: transform var(--bp-dur-2) var(--bp-ease); }
+@media (hover: hover) { .bp-hov-nudge:hover { transform: translateY(-2px); } }
+.bp-hov-nudge:active { transform: translateY(0); }   /* press returns it to the lattice */
+
+/* Hardware wake — rivets darken to ink when their plate is hovered */
+@media (hover: hover) { .bp-hov-hw:hover { --bp-hw: var(--bp-ink); } }
+.bp-hov-hw { transition: none; }
+.bp-hov-hw::after { transition: background var(--bp-dur-1) var(--bp-ease),
+                                background-image var(--bp-dur-1) var(--bp-ease); }
+
+/* Arrow advance — the glyph moves, the label does not */
+.bp-hov-arrow .bp-arrow {
+  display: inline-block;
+  transition: transform var(--bp-dur-2) var(--bp-ease);
+}
+@media (hover: hover) { .bp-hov-arrow:hover .bp-arrow { transform: translate(3px, -3px); } }
+
+/* Image zoom inside a fixed window — the plate is still, the content moves */
+.bp-hov-zoom { overflow: hidden; }
+.bp-hov-zoom > img, .bp-hov-zoom > canvas, .bp-hov-zoom > svg {
+  transition: transform var(--bp-dur-3) var(--bp-ease);
+}
+@media (hover: hover) {
+  .bp-hov-zoom:hover > img, .bp-hov-zoom:hover > canvas, .bp-hov-zoom:hover > svg {
+    transform: scale(1.04);
+  }
+}
+
+/* Underline draw — grows from the left rather than fading in */
+.bp-hov-rule { position: relative; text-decoration: none; }
+.bp-hov-rule::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -3px;
+  height: var(--bp-hair); background: currentColor;
+  transform: scaleX(0); transform-origin: left;
+  transition: transform var(--bp-dur-2) var(--bp-ease);
+}
+@media (hover: hover) { .bp-hov-rule:hover::after { transform: scaleX(1); } }
+
+/* Entrance — reveal once. Add .is-in from an IntersectionObserver. */
+.bp-reveal {
+  opacity: 0; transform: translateY(8px);
+  transition: opacity var(--bp-dur-4) var(--bp-ease),
+              transform var(--bp-dur-4) var(--bp-ease);
+}
+.bp-reveal.is-in { opacity: 1; transform: none; }
+
+/* Rule that draws itself in rather than fading */
+.bp-draw-x { position: relative; }
+.bp-draw-x::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+  height: var(--bp-hair); background: var(--bp-rule);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform var(--bp-dur-4) var(--bp-ease);
+}
+.bp-draw-x.is-in::after { transform: scaleX(1); }
+
+/* ============================================================================
+   THEME SWITCHING
+   A surface swap repaints the whole page, and the default transition above
+   covers interactive elements ONLY — so without this a theme change animates
+   the buttons and snaps everything around them, which reads worse than
+   snapping uniformly.
+
+   The fix is a transition that exists only while the swap is in flight. Set
+   `data-bp-theme-shift` on <html>, change the surface, remove the attribute
+   after --bp-dur-2. A permanent global transition would be wrong: it makes
+   reveals sluggish and costs a repaint on every unrelated state change.
+
+   Deliberately absent from the list: transform, opacity, size and layout —
+   animating those here would break any reveal mid-flight.
+   ========================================================================== */
+
+/* Gated on no-preference rather than left to the reduced-motion reset below.
+   That reset is `*` at specificity (0,0,0); this rule is (0,1,0). Both carry
+   !important, and specificity is compared BEFORE source order — so the more
+   specific rule would win and a reduced-motion user would still get the
+   animated swap. The media query removes the rule entirely instead. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-bp-theme-shift],
+  [data-bp-theme-shift] *,
+  [data-bp-theme-shift] *::before,
+  [data-bp-theme-shift] *::after {
+    transition:
+      background-color var(--bp-dur-2) var(--bp-ease),
+      border-color     var(--bp-dur-2) var(--bp-ease),
+      color            var(--bp-dur-2) var(--bp-ease),
+      fill             var(--bp-dur-2) var(--bp-ease),
+      stroke           var(--bp-dur-2) var(--bp-ease) !important;
+  }
+}
+
+/* ============================================================================
+   MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Reveals must land in their resting state, not stay offset at 8px. */
+  .bp-reveal { opacity: 1 !important; transform: none !important; }
+  .bp-draw-x::after { transform: scaleX(1) !important; }
+}
+
+/* ============================================================================
+   CONSOLE — dense application interfaces
+   Panels divided by hairlines, never stacks of rounded cards.
+   See reference/console.md and reference/map.md.
+   ========================================================================== */
+
+/* --- Lift: the ONE shadow carve-out. Hard offset, zero blur — a printed
+       registration offset, not elevation. Canvas-floating surfaces only. --- */
+.bp-lift {
+  border: var(--bp-hair) solid var(--bp-rule-hard);
+  background: var(--bp-panel-2);
+  box-shadow: 3px 3px 0 0 var(--bp-lift);
+}
+
+/* --- Shell ---------------------------------------------------------------- */
+.bp-shell { display: grid; grid-template-columns: auto auto 1fr; min-height: 100%; }
+
+.bp-toolbar {
+  display: flex; align-items: center; gap: var(--bp-1);
+  height: 52px; padding-inline: var(--bp-3);
+  background: var(--bp-panel-2);
+  border-bottom: var(--bp-hair) solid var(--bp-rule);
+}
+.bp-toolbar__item {
+  display: inline-flex; align-items: center; gap: var(--bp-2);
+  height: 34px; padding-inline: var(--bp-3);
+  font-family: var(--bp-text); font-size: 0.875rem;   /* sentence case */
+  color: var(--bp-ink); background: none; border: 0; border-radius: var(--bp-r-1);
+  cursor: pointer; white-space: nowrap;
+  transition: background-color var(--bp-dur-1) var(--bp-ease);
+}
+@media (hover: hover) { .bp-toolbar__item:hover { background: var(--bp-hover-2); } }
+.bp-toolbar__item:active { background: color-mix(in srgb, var(--bp-hover-2) var(--bp-press-mix), var(--bp-ink)); }
+/* The active tool is where a console spends its accent. */
+.bp-toolbar__item[aria-pressed="true"] { background: var(--bp-accent); color: var(--bp-accent-on); }
+.bp-toolbar__item[aria-pressed="true"]:active { background: color-mix(in srgb, var(--bp-accent) 76%, var(--bp-ink)); }
+.bp-toolbar__sep { width: var(--bp-hair); align-self: stretch; margin-inline: var(--bp-2);
+  background: var(--bp-rule); }
+
+.bp-rail {
+  width: 48px; display: flex; flex-direction: column; align-items: center;
+  gap: var(--bp-1); padding-block: var(--bp-3);
+  border-right: var(--bp-hair) solid var(--bp-rule);
+  background: var(--bp-panel-2);
+}
+.bp-rail__item {
+  width: 100%; height: 40px; display: flex; align-items: center; justify-content: center;
+  color: var(--bp-ink-2); background: none; border: 0; cursor: pointer;
+  transition: background-color var(--bp-dur-1) var(--bp-ease), color var(--bp-dur-1) var(--bp-ease);
+}
+@media (hover: hover) { .bp-rail__item:hover { background: var(--bp-hover-2); color: var(--bp-ink); } }
+.bp-rail__item:active { background: color-mix(in srgb, var(--bp-hover-2) var(--bp-press-mix), var(--bp-ink));
+                        color: var(--bp-ink); }
+.bp-rail__item[aria-current] { background: var(--bp-inset); color: var(--bp-ink); }
+
+/* --- Panel: ONE surface divided by full-width hairlines ------------------- */
+.bp-panel {
+  width: clamp(340px, 26vw, 420px);
+  background: var(--bp-panel-2);
+  border-right: var(--bp-hair) solid var(--bp-rule);
+  display: flex; flex-direction: column; overflow: auto;
+}
+.bp-panel__head {
+  display: flex; align-items: center; gap: var(--bp-3);
+  min-height: 56px; padding-inline: var(--bp-5);
+  border-bottom: var(--bp-hair) solid var(--bp-rule);
+}
+.bp-panel__head h2 { font-family: var(--bp-text); font-size: 1.0625rem; font-weight: 500;
+  letter-spacing: -0.01em; margin-right: auto; }
+/* Drops its bottom padding so a tab row can reach the border. */
+.bp-panel__head--tabs { align-items: flex-end; padding-bottom: 0; min-height: 48px; }
+
+/* Inverted head = you are editing an object, not browsing a view. */
+.bp-panel__head--object { background: var(--bp-invert); color: var(--bp-ink-inv);
+  border-bottom-color: var(--bp-invert); }
+
+.bp-section { border-bottom: var(--bp-hair) solid var(--bp-rule); padding: var(--bp-5); }
+.bp-section:last-child { border-bottom: 0; }
+.bp-section > h3, .bp-section-head {
+  font-family: var(--bp-text); font-size: 0.75rem; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--bp-ink);                    /* dark and confident, not a whisper */
+  margin: 0 0 var(--bp-3);
+}
+.bp-row {
+  display: flex; align-items: center; gap: var(--bp-3);
+  min-height: 44px; font-size: 0.9375rem;  /* 15 — rows are targets */
+}
+.bp-row__value { margin-left: auto; font-family: var(--bp-text); font-variant-numeric: tabular-nums; color: var(--bp-ink); }
+.bp-row__swatch { width: 26px; height: 4px; border-radius: 1px; flex: none; }
+.bp-note { font-size: 0.75rem; font-style: italic; color: var(--bp-ink-2); }
+.bp-note u { text-decoration-style: solid; text-underline-offset: 2px; }
+
+/* --- Tabs ----------------------------------------------------------------- */
+/* The row overlaps its container's bottom border by 1px, so the active
+   underline lands on that divider instead of floating above it. */
+.bp-tabs { display: flex; gap: var(--bp-5); align-items: flex-end; margin-bottom: -1px; }
+.bp-tab {
+  font-family: var(--bp-text); font-size: 0.75rem; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 0 0 var(--bp-3); border: 0; background: none; cursor: pointer;
+  color: currentColor; opacity: .55; border-bottom: 2px solid transparent;
+  transition: opacity var(--bp-dur-1) var(--bp-ease), border-color var(--bp-dur-1) var(--bp-ease);
+}
+@media (hover: hover) { .bp-tab:hover { opacity: .8; } }
+.bp-tab:active { opacity: 1; }
+.bp-tab[aria-selected="true"] { opacity: 1; border-bottom-color: currentColor; }
+
+/* --- Field strip ---------------------------------------------------------- */
+.bp-fields { display: flex; background: var(--bp-inset);
+  border-bottom: var(--bp-hair) solid var(--bp-rule); }
+.bp-field { flex: 1; padding: var(--bp-3) var(--bp-5);
+  border-right: var(--bp-hair) solid var(--bp-rule); }
+.bp-field:last-child { border-right: 0; }
+.bp-field__label { font-size: 0.75rem; color: var(--bp-ink-2); }
+.bp-field__value { font-size: 1.0625rem; color: var(--bp-ink); margin-top: 2px; }
+.bp-field__value[contenteditable], .bp-editable {
+  text-decoration: underline dotted var(--bp-ink-3); text-underline-offset: 3px;
+  cursor: text; outline: none;
+}
+
+/* --- Stat block: big number + caption + shown arithmetic ------------------ */
+.bp-stat__value { font-family: var(--bp-display); font-size: 2.125rem; font-weight: 500;
+  letter-spacing: -0.03em; line-height: 1; }
+.bp-stat__caption { font-family: var(--bp-text); font-size: 0.6875rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--bp-ink-3);
+  margin-top: var(--bp-2); }
+.bp-calc { display: flex; font-size: 0.8125rem; padding-block: 5px; }
+.bp-calc > :last-child { margin-left: auto; font-family: var(--bp-text); font-variant-numeric: tabular-nums; }
+.bp-calc--total { font-weight: 500; border-top: var(--bp-hair) solid var(--bp-rule);
+  margin-top: var(--bp-2); padding-top: var(--bp-2); }
+.bp-delta { font-size: 0.75rem; }
+.bp-delta--up { color: var(--bp-ok); } .bp-delta--down { color: var(--bp-bad); }
+
+/* --- Segmented control ---------------------------------------------------- */
+.bp-seg { display: inline-flex; border: var(--bp-hair) solid var(--bp-rule);
+  border-radius: var(--bp-r-1); overflow: hidden; }
+.bp-seg > button {
+  height: 32px; padding-inline: var(--bp-3); border: 0; background: none;
+  border-right: var(--bp-hair) solid var(--bp-rule);
+  font-family: var(--bp-text); font-size: 0.8125rem; color: var(--bp-ink-2);
+  cursor: pointer; transition: background-color var(--bp-dur-1) var(--bp-ease);
+}
+.bp-seg > button:last-child { border-right: 0; }
+@media (hover: hover) { .bp-seg > button:hover { background: var(--bp-hover-1); } }
+.bp-seg > button:active { background: color-mix(in srgb, var(--bp-hover-1) var(--bp-press-mix), var(--bp-ink)); }
+.bp-seg > button[aria-pressed="true"] { background: var(--bp-inset); color: var(--bp-ink); font-weight: 500; }
+
+/* --- Grouped menu --------------------------------------------------------- */
+.bp-menu { min-width: 240px; padding-block: var(--bp-2); border-radius: var(--bp-r-1); }
+.bp-menu__group { font-family: var(--bp-text); font-size: 0.6875rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--bp-ink-3);
+  padding: var(--bp-3) var(--bp-4) var(--bp-1); }
+.bp-menu__item {
+  display: flex; align-items: center; gap: var(--bp-3); width: 100%;
+  height: 34px; padding-inline: var(--bp-4); border: 0; background: none;
+  font-family: var(--bp-text); font-size: 0.875rem; color: var(--bp-ink);
+  cursor: pointer; text-align: left;
+  transition: background-color var(--bp-dur-1) var(--bp-ease);
+}
+@media (hover: hover) { .bp-menu__item:hover { background: var(--bp-hover-2); } }
+.bp-menu__item:active { background: color-mix(in srgb, var(--bp-hover-2) var(--bp-press-mix), var(--bp-ink)); }
+.bp-menu__key { margin-left: auto; font-family: var(--bp-text); font-size: 0.6875rem;
+  color: var(--bp-ink-3); }
+
+/* --- Keycap --------------------------------------------------------------- */
+.bp-key { font-family: var(--bp-text); font-size: 0.6875rem; padding: 3px 5px;
+  border: var(--bp-hair) solid var(--bp-rule-hard); border-radius: var(--bp-r-1);
+  color: var(--bp-ink-2); }
+
+/* --- Popover / toast ------------------------------------------------------ */
+.bp-popover { width: 320px; padding: var(--bp-4); border-radius: var(--bp-r-1);
+  font-size: 0.84375rem; color: var(--bp-ink-2); }
+.bp-popover h4 { font-size: 0.9375rem; font-weight: 500; color: var(--bp-ink); margin: 0; }
+.bp-popover ul { margin: var(--bp-2) 0; padding-left: var(--bp-4); }
+.bp-popover li::marker { color: var(--bp-ornament); }
+
+.bp-toast {
+  display: inline-flex; align-items: center; gap: var(--bp-3);
+  background: var(--bp-invert); color: var(--bp-ink-inv);
+  font-size: 0.8125rem; padding: var(--bp-2) var(--bp-3);
+  border-radius: var(--bp-r-1);
+}
+
+/* --- Floating format toolbar ---------------------------------------------- */
+.bp-fmtbar {
+  display: inline-flex; align-items: center; gap: var(--bp-2);
+  height: 36px; padding-inline: var(--bp-2);
+  background: var(--bp-invert); color: var(--bp-ink-inv);
+  border-radius: var(--bp-r-1); box-shadow: 3px 3px 0 0 var(--bp-lift);
+}
+.bp-fmtbar__sep { width: var(--bp-hair); height: 18px; background: rgba(255,255,255,.18); }
+.bp-swatch { width: 18px; height: 18px; border-radius: 50%; border: 0; cursor: pointer;
+  padding: 0; transition: transform var(--bp-dur-1) var(--bp-ease); }
+@media (hover: hover) { .bp-swatch:hover { transform: scale(1.12); } }
+.bp-swatch:active { transform: scale(1.04); filter: brightness(.9); }
+.bp-swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--bp-invert), 0 0 0 3.5px currentColor; }
+
+/* --- Avatar stack --------------------------------------------------------- */
+.bp-avatars { display: flex; }
+.bp-avatars > * { width: 26px; height: 26px; border-radius: 50%; margin-left: -8px;
+  box-shadow: 0 0 0 2px var(--bp-panel-2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--bp-text); font-size: 0.6875rem; font-weight: 500; color: #fff; }
+.bp-avatars > :first-child { margin-left: 0; }
+
+/* --- Timeline / Gantt ----------------------------------------------------- */
+.bp-gantt { position: relative; }
+.bp-gantt__hours { position: absolute; inset: 0; display: flex; pointer-events: none; }
+.bp-gantt__hours > i { flex: 1; border-left: var(--bp-hair) solid var(--bp-rule-soft); }
+.bp-gantt__row { display: flex; align-items: center; gap: 2px; height: 44px;
+  border-bottom: var(--bp-hair) solid var(--bp-rule-soft); position: relative; }
+.bp-block {
+  height: 26px; border-radius: var(--bp-r-1); display: flex; align-items: center;
+  justify-content: center; color: #fff; font-size: 0.75rem; font-weight: 600;
+  font-family: var(--bp-text); flex: none;
+  transition: filter var(--bp-dur-1) var(--bp-ease);
+}
+@media (hover: hover) { .bp-block:hover { filter: brightness(.92); } }
+.bp-block:active { filter: brightness(.84); }
+/* A saturated block darkened on a dark surface loses contrast with it. */
+@media (hover: hover) { [data-bp-surface="carbon"] .bp-block:hover { filter: brightness(1.14); } }
+[data-bp-surface="carbon"] .bp-block:active { filter: brightness(1.28); }
+.bp-block--deadhead { background: var(--bp-rule); color: var(--bp-ink-2); }
+/* An unlabeled gap in a scheduling tool is a bug report waiting to happen. */
+.bp-layover { display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex: none; font-family: var(--bp-text); font-variant-numeric: tabular-nums; font-size: 0.625rem; color: var(--bp-ink-3); }
+.bp-layover::after { content: ""; display: block; width: 100%;
+  border-top: var(--bp-hair) dashed var(--bp-rule-hard); margin-top: 2px; }
+
+/* ============================================================================
+   MAP
+   ========================================================================== */
+
+.bp-map { position: relative; background: var(--bp-paper); overflow: hidden; }
+
+/* Controls: SQUARE. Round zoom buttons are the vendor default. */
+.bp-mapctl { position: absolute; display: flex; flex-direction: column;
+  border-radius: var(--bp-r-1); overflow: hidden; }
+.bp-mapctl > button {
+  width: 34px; height: 34px; border: 0; background: var(--bp-panel-2); color: var(--bp-ink);
+  border-bottom: var(--bp-hair) solid var(--bp-rule); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background-color var(--bp-dur-1) var(--bp-ease);
+}
+.bp-mapctl > button:last-child { border-bottom: 0; }
+@media (hover: hover) { .bp-mapctl > button:hover { background: var(--bp-hover-2); } }
+.bp-mapctl > button:active { background: color-mix(in srgb, var(--bp-hover-2) var(--bp-press-mix), var(--bp-ink)); }
+
+/* A map without a scale bar is a picture. */
+.bp-scalebar { position: absolute; font-family: var(--bp-text); font-variant-numeric: tabular-nums; font-size: 0.6875rem;
+  color: var(--bp-ink-2); }
+.bp-scalebar::after { content: ""; display: block; height: 5px; margin-top: 2px;
+  border: var(--bp-hair) solid var(--bp-ink-2); border-top: 0; }
+
+/* Crosshair, not a teardrop pin — a pin's balloon pulls the eye off the coordinate. */
+.bp-marker { position: absolute; width: 11px; height: 11px; transform: translate(-50%, -50%);
+  background: var(--bp-ink);
+  -webkit-mask-image: var(--bp-mark-cross); mask-image: var(--bp-mark-cross);
+  -webkit-mask-size: 11px 11px; mask-size: 11px 11px; }
+.bp-stop { position: absolute; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--bp-panel-2); border: 2px solid currentColor;
+  transform: translate(-50%, -50%); }
+
+/* User annotation: rotatable, because a drafter letters along the road. */
+.bp-annot {
+  position: absolute; font-size: 0.8125rem; color: var(--bp-ink);
+  background: var(--bp-panel-2); border: var(--bp-hair) solid var(--bp-ink);
+  border-radius: var(--bp-r-1); padding: 4px 7px; white-space: nowrap;
+  transform-origin: center;
+}
+.bp-annot[aria-selected="true"] { border: 2px solid var(--bp-accent);
+  background: var(--bp-accent-wash); }
+
+/* Canvas affordance pill — exists for seconds, so the accent is well spent. */
+.bp-canvas-pill {
+  position: absolute; font-size: 0.6875rem; font-weight: 500; white-space: nowrap;
+  padding: 3px 8px; border-radius: var(--bp-r-1); transform: translate(-50%, -50%);
+  background: var(--bp-accent); color: var(--bp-accent-on);
+}
+.bp-canvas-pill--start { background: var(--bp-ok); color: #fff; }
+.bp-canvas-pill--end   { background: var(--bp-ink); color: var(--bp-ink-inv); }
+
+/* Squares for handles, circles for stops — so data and controls never blur. */
+.bp-vertex { position: absolute; width: 7px; height: 7px; background: var(--bp-panel-2);
+  border: 1.5px solid var(--bp-ink); transform: translate(-50%, -50%); }
+.bp-vertex--mid { width: 5px; height: 5px; opacity: .5; }
+@media (hover: hover) { .bp-vertex--mid:hover { opacity: 1; } }
+
+/* ============================================================================
+   DRAFTING — architectural conventions
+   Grid bubbles, dimension lines, callouts, hatches, rulers, section marks.
+   See reference/ornament.md.
+   ========================================================================== */
+
+/* --- Grid bubble: the circled letter/number that names a rail. The single
+       most characteristic mark in an architectural plan — and blueprint
+       already has rails, so they may as well be named. --------------------- */
+.bp-bubble {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: var(--bp-hair) solid var(--bp-ornament);
+  background: var(--bp-paper);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--bp-mono); font-size: 0.625rem; line-height: 1;
+  color: var(--bp-ink-3);
+}
+/* Sits on a rail, centered over it, with a stem down to the line. */
+.bp-bubble--pin { position: absolute; top: 0; transform: translate(-50%, -50%); }
+
+/* --- Dimension line: extension ticks at both ends, the measurement breaking
+       the line at its midpoint. Horizontal by default. -------------------- */
+.bp-dim {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  height: 12px;
+}
+.bp-dim::before {                       /* the run */
+  content: ""; position: absolute; left: 0; right: 0; top: 50%;
+  border-top: var(--bp-hair) solid var(--bp-ornament);
+}
+.bp-dim::after {                        /* extension ticks */
+  content: ""; position: absolute; inset: 0;
+  border-left: var(--bp-hair) solid var(--bp-ornament);
+  border-right: var(--bp-hair) solid var(--bp-ornament);
+}
+.bp-dim > span {
+  position: relative; z-index: 1; background: var(--bp-paper); padding-inline: 6px;
+  font-family: var(--bp-mono); font-size: 0.625rem; color: var(--bp-ink-3);
+}
+.bp-dim--y { width: 12px; height: auto; flex-direction: column; }
+.bp-dim--y::before { left: 50%; right: auto; top: 0; bottom: 0;
+  border-top: 0; border-left: var(--bp-hair) solid var(--bp-ornament); }
+.bp-dim--y::after { border: 0; border-top: var(--bp-hair) solid var(--bp-ornament);
+  border-bottom: var(--bp-hair) solid var(--bp-ornament); }
+.bp-dim--y > span { writing-mode: vertical-rl; padding-block: 6px; padding-inline: 0; }
+
+/* --- Detail callout: a circled reference with a leader to what it marks --- */
+.bp-callout {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: var(--bp-hair) solid var(--bp-ink-3);
+  background: var(--bp-paper); color: var(--bp-ink-2);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--bp-mono); font-size: 0.6875rem;
+}
+.bp-leader { position: absolute; height: var(--bp-hair); background: var(--bp-ornament);
+  transform-origin: left center; pointer-events: none; }
+.bp-leader::after { content: ""; position: absolute; right: -2px; top: -1.5px;
+  width: 4px; height: 4px; border-radius: 50%; background: var(--bp-ornament); }
+
+/* --- Hatches: the fill vocabulary of a section drawing ------------------- */
+.bp-hatch      { background-image: repeating-linear-gradient(45deg,
+                   var(--bp-grid) 0 1px, transparent 1px 7px); }
+.bp-hatch--fine{ background-image: repeating-linear-gradient(45deg,
+                   var(--bp-grid) 0 1px, transparent 1px 4px); }
+.bp-hatch--x   { background-image:
+                   repeating-linear-gradient(45deg,  var(--bp-grid) 0 1px, transparent 1px 8px),
+                   repeating-linear-gradient(-45deg, var(--bp-grid) 0 1px, transparent 1px 8px); }
+.bp-hatch--tile{ background-image:
+                   repeating-linear-gradient(to right,  var(--bp-grid) 0 1px, transparent 1px 9px),
+                   repeating-linear-gradient(to bottom, var(--bp-grid) 0 1px, transparent 1px 9px); }
+.bp-hatch--brick {
+  background-image:
+    repeating-linear-gradient(to bottom, var(--bp-grid) 0 1px, transparent 1px 10px),
+    repeating-linear-gradient(to right,  var(--bp-grid) 0 1px, transparent 1px 24px);
+  background-size: 100% 20px, 48px 100%;
+}
+
+/* --- Centerline: the dash-dot rule that says "axis of symmetry" ---------- */
+.bp-centerline {
+  height: var(--bp-hair); border: 0; margin: 0;
+  background-image: repeating-linear-gradient(to right,
+    var(--bp-ornament) 0 14px, transparent 14px 19px,
+    var(--bp-ornament) 19px 22px, transparent 22px 27px);
+}
+.bp-centerline--y { width: var(--bp-hair); height: 100%;
+  background-image: repeating-linear-gradient(to bottom,
+    var(--bp-ornament) 0 14px, transparent 14px 19px,
+    var(--bp-ornament) 19px 22px, transparent 22px 27px); }
+
+/* --- Ruler: a graduated tick strip. Minor every 8px, major every 40px. --- */
+.bp-ruler {
+  height: 14px;
+  background-repeat: repeat-x;
+  background-position: 0 100%, 0 100%;
+  background-image:
+    repeating-linear-gradient(to right, var(--bp-ornament) 0 1px, transparent 1px 8px),
+    repeating-linear-gradient(to right, var(--bp-ink-3)   0 1px, transparent 1px 40px);
+  background-size: 100% 5px, 100% 10px;
+}
+.bp-ruler--top { background-position: 0 0, 0 0; }
+
+/* --- Section / elevation marker: a filled triangle pointing at the cut --- */
+.bp-sectionmark {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--bp-mono); font-size: 0.625rem; color: var(--bp-ink-3);
+}
+.bp-sectionmark::before {
+  content: ""; width: 9px; height: 9px; background: var(--bp-ink-3);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+/* --- Chevron strip: direction of travel / sequence ----------------------- */
+.bp-chevrons {
+  height: 10px;
+  background-repeat: repeat-x;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='10'><path d='M2 1.5 L7 5 L2 8.5' fill='none' stroke='%23000' stroke-width='1'/></svg>");
+  opacity: .34;
+}
+
+/* --- Construction geometry: the circles and guides a mark is built from -- */
+.bp-construct { stroke: var(--bp-ornament); stroke-width: 1; fill: none; }
+.bp-construct--dash { stroke-dasharray: 4 3; }
+
+/* --- Basemap tokens, so a map follows the surface axis. See map.md §1. ---- */
+[data-bp-surface="paper"], [data-bp-surface="console"] {
+  --bp-map-land: #F4F5F6; --bp-map-water: #E3E8EC; --bp-map-park: #E9EDE7;
+  --bp-map-road: #FFFFFF; --bp-map-casing: #E4E6E8;
+  --bp-map-label: #7C8794; --bp-map-street: #98A0AA;
+}
+[data-bp-surface="carbon"] {
+  --bp-map-land: #171A1D; --bp-map-water: #0E1418; --bp-map-park: #1A211A;
+  --bp-map-road: #2C3136; --bp-map-casing: #14181C;
+  --bp-map-label: #8A929C; --bp-map-street: #6E7680;
+}
