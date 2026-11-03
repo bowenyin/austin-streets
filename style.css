@@ -62,7 +62,7 @@ h1 {
 
 .score-pct {
   font-family: var(--bp-display);
-  font-size: 64px;
+  font-size: 52px;
   font-weight: var(--bp-w-display);
   letter-spacing: -0.03em;
   line-height: 1;
@@ -274,7 +274,7 @@ h1 {
 
   .panel-head { display: none; }
   .score { padding: 28px 16px 14px; display: grid; grid-template-columns: auto 1fr; align-items: end; column-gap: 12px; }
-  .score-pct { font-size: 48px; }
+  .score-pct { font-size: 40px; }
   .score-caption { margin: 0 0 4px; }
   .score-row { grid-column: 1 / -1; }
   .list-head, #list li, .empty, .panel-foot { padding-left: 16px; padding-right: 16px; }
