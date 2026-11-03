@@ -23,6 +23,8 @@ scripts/fetch-osm.sh
 node scripts/build-data.mjs
 ```
 
+`node scripts/audit-matching.mjs` types natural variants of every street name (abbreviated, lowercase, without direction or street type) and reports any that land on the wrong street.
+
 `normalize.js` turns names into matching keys and is shared by the build script and the game. It drops directional prefixes, street-type suffixes, and route designations, so "S Lamar Blvd", "Lamar", "I-35", and "IH 35" all match. Divided highways count at half length so both carriageways aren't double-counted.
 
 ## Map label font

@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { normalize, displayName } from '../normalize.js';
+import { canonicalName, displayName, leadingDirection, trailingDirection, createStreetKey, matchKey, ROUTE_GROUPS } from '../normalize.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readRaw = (name) => JSON.parse(fs.readFileSync(path.join(root, 'raw', name + '.json'), 'utf8')).elements;
@@ -219,22 +219,27 @@ console.log(`boundary: ${cityRings.length} rings`);
 
 // ---------- streets ----------
 
+const ways = readRaw('streets').map((way) => ({ way, runs: clipLine(toXY(way.geometry), inAustin) }))
+  .filter(({ runs }) => runs.length);
+const streetKey = createStreetKey(ways.map(({ way }) => way.tags.name));
+
 const groups = new Map();
-for (const way of readRaw('streets')) {
+for (const { way, runs } of ways) {
   const name = way.tags.name;
-  const key = normalize(name);
+  const key = streetKey(name);
   if (!key) continue;
   const highway = way.tags.highway;
   // Divided highways are mapped as two one-way carriageways; count each at half length.
   const factor = (highway === 'motorway' || highway === 'trunk') && way.tags.oneway === 'yes' ? 0.5 : 1;
-  for (const run of clipLine(toXY(way.geometry), inAustin)) {
+  for (const run of runs) {
     const miles = lineMiles(run) * factor;
-    if (!groups.has(key)) groups.set(key, { lines: [], miles: 0, displays: new Map() });
+    if (!groups.has(key)) groups.set(key, { lines: [], miles: 0, names: new Map(), directions: new Set(), trailing: new Set() });
     const g = groups.get(key);
     g.lines.push(run);
     g.miles += miles;
-    const d = displayName(name);
-    g.displays.set(d, (g.displays.get(d) || 0) + miles);
+    g.names.set(name, (g.names.get(name) || 0) + miles);
+    g.directions.add(leadingDirection(name));
+    g.trailing.add(trailingDirection(name));
   }
 }
 
@@ -243,7 +248,17 @@ const streets = [];
 for (const [key, g] of groups) {
   if (g.miles < 0.005) continue;
   total += g.miles;
-  const display = [...g.displays.entries()].sort((a, b) => b[1] - a[1])[0][0];
+  // Keep the direction in the display when every segment shares it ("West Lynn Street"), drop it when
+  // segments differ ("North/South Lamar" -> "Lamar Boulevard").
+  const [only] = g.directions;
+  const keepDirection = g.directions.size === 1 && only !== '' && !/^\d/.test(key);
+  const dropTrailingDirection = g.trailing.size > 1 || /^\d/.test(key);
+  const displays = new Map();
+  for (const [name, miles] of g.names) {
+    const d = displayName(name, { keepDirection, dropTrailingDirection });
+    displays.set(d, (displays.get(d) || 0) + miles);
+  }
+  const display = [...displays.entries()].sort((a, b) => b[1] - a[1])[0][0];
   streets.push({
     k: key,
     d: display,
@@ -252,8 +267,25 @@ for (const [key, g] of groups) {
   });
 }
 streets.sort((a, b) => b.m - a.m);
-fs.writeFileSync(path.join(root, 'data', 'streets.json'), JSON.stringify({ total: +total.toFixed(3), streets }));
-console.log(`streets: ${streets.length} names, ${total.toFixed(1)} miles`);
+// Names the matcher would send to a different street ("Breezy Pass" -> Breezy Pass Cove), mapped to their own
+// key. Each name is checked as written and without its direction prefix; the longer street wins a tie.
+const keys = new Set(streets.map((s) => s.k));
+const milesByKey = new Map(streets.map((s) => [s.k, s.m]));
+const claims = new Map();
+for (const name of new Set(ways.map(({ way }) => way.tags.name))) {
+  const key = streetKey(name);
+  if (!keys.has(key)) continue;
+  for (const form of new Set([name, displayName(name)])) {
+    const got = matchKey(form, (k) => keys.has(k));
+    if (got === key || ROUTE_GROUPS[got]?.includes(key)) continue;
+    const canonical = canonicalName(form);
+    const prev = claims.get(canonical);
+    if (!prev || milesByKey.get(key) > milesByKey.get(prev)) claims.set(canonical, key);
+  }
+}
+const exact = Object.fromEntries(claims);
+fs.writeFileSync(path.join(root, 'data', 'streets.json'), JSON.stringify({ total: +total.toFixed(3), streets, exact }));
+console.log(`streets: ${streets.length} names, ${total.toFixed(1)} miles, ${Object.keys(exact).length} exact-name overrides`);
 console.log('top:', streets.slice(0, 15).map((s) => `${s.d} (${s.k}) ${s.m.toFixed(1)}mi`).join(', '));
 
 // ---------- background ----------

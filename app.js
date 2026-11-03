@@ -1,4 +1,4 @@
-import { candidateKeys, ROUTE_GROUPS } from './normalize.js';
+import { matchKey, ROUTE_GROUPS } from './normalize.js';
 import { encodeProgress, decodeProgress } from './progress-code.js';
 
 const STORAGE_KEY = 'austin-streets:named';
@@ -19,6 +19,7 @@ const els = {
 const state = {
   streets: [],        // [{ k, d, m, coords }]
   byKey: new Map(),   // key -> index
+  exact: {},          // full street name -> its key, where it collides with another street's key
   total: 0,
   named: [],          // indexes in the order they were named
   sort: 'found',
@@ -265,13 +266,12 @@ function shake() {
 
 // Streets a guess names: a route group's roads, or the first matching street.
 function matchGuess(text) {
-  for (const key of candidateKeys(text)) {
-    if (ROUTE_GROUPS[key]) {
-      return { route: key, matches: ROUTE_GROUPS[key].map((k) => state.byKey.get(k)).filter((i) => i !== undefined) };
-    }
-    if (state.byKey.has(key)) return { route: null, matches: [state.byKey.get(key)] };
+  const key = matchKey(text, (k) => state.byKey.has(k), state.exact);
+  if (key === null) return { route: null, matches: [] };
+  if (ROUTE_GROUPS[key]) {
+    return { route: key, matches: ROUTE_GROUPS[key].map((k) => state.byKey.get(k)).filter((i) => i !== undefined) };
   }
-  return { route: null, matches: [] };
+  return { route: null, matches: [state.byKey.get(key)] };
 }
 
 function submitGuess(text) {
@@ -442,6 +442,7 @@ async function start() {
   ]);
 
   state.total = streetData.total;
+  state.exact = streetData.exact || {};
   state.streets = streetData.streets.map((s) => ({ k: s.k, d: s.d, m: s.m, coords: s.g.map(decodeLine) }));
   state.streets.forEach((s, i) => state.byKey.set(s.k, i));
   state.named = loadSaved();

@@ -1,29 +1,29 @@
 // Turns a street name (from OSM or typed by a player) into a matching key,
 // e.g. "South Lamar Blvd" -> "LAMAR", "E 6th St" -> "6TH", "I-35" -> "35".
 
-const DIRECTIONS = new Set([
-  'NORTH', 'SOUTH', 'EAST', 'WEST', 'NORTHEAST', 'NORTHWEST', 'SOUTHEAST', 'SOUTHWEST',
-  'N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW',
-]);
-
 const DIRECTION_WORDS = {
   N: 'NORTH', S: 'SOUTH', E: 'EAST', W: 'WEST', NE: 'NORTHEAST', NW: 'NORTHWEST', SE: 'SOUTHEAST', SW: 'SOUTHWEST',
 };
+const DIRECTIONS = new Set(Object.values(DIRECTION_WORDS));
 
+// Street-type words, keyed by their USPS abbreviations.
+const SUFFIX_WORDS = {
+  ST: 'STREET', AVE: 'AVENUE', AV: 'AVENUE', BLVD: 'BOULEVARD', DR: 'DRIVE', RD: 'ROAD', LN: 'LANE',
+  CT: 'COURT', CIR: 'CIRCLE', CV: 'COVE', TRL: 'TRAIL', PKWY: 'PARKWAY', EXPY: 'EXPRESSWAY',
+  HWY: 'HIGHWAY', FWY: 'FREEWAY', WY: 'WAY', PL: 'PLACE', TER: 'TERRACE', LP: 'LOOP', BND: 'BEND',
+  HOLW: 'HOLLOW', XING: 'CROSSING', PLZ: 'PLAZA', TRCE: 'TRACE', SQ: 'SQUARE', ALY: 'ALLEY',
+};
 const SUFFIXES = new Set([
-  'STREET', 'ST', 'AVENUE', 'AVE', 'AV', 'BOULEVARD', 'BLVD', 'DRIVE', 'DR', 'ROAD', 'RD',
-  'LANE', 'LN', 'COURT', 'CT', 'CIRCLE', 'CIR', 'COVE', 'CV', 'TRAIL', 'TRL', 'PARKWAY', 'PKWY',
-  'EXPRESSWAY', 'EXPY', 'HIGHWAY', 'HWY', 'FREEWAY', 'FWY', 'WAY', 'WY', 'PLACE', 'PL',
-  'TERRACE', 'TER', 'LOOP', 'LP', 'PASS', 'PATH', 'BEND', 'BND', 'HOLLOW', 'HOLW', 'CROSSING',
-  'XING', 'RUN', 'PLAZA', 'PLZ', 'WALK', 'TRACE', 'TRCE', 'SQUARE', 'SQ', 'ROW', 'CUTOFF',
-  'SKYWAY', 'ALLEY', 'ALY',
+  ...Object.values(SUFFIX_WORDS), 'PASS', 'PATH', 'RUN', 'WALK', 'ROW', 'CUTOFF', 'SKYWAY',
 ]);
 
-// Trailing phrases that describe a carriageway rather than a different street.
-const TRAILING_PHRASES = [
-  'SERVICE ROAD', 'SERVICE RD', 'FRONTAGE ROAD', 'FRONTAGE RD', 'TOLL ROAD', 'TOLL RD',
-  'NORTHBOUND', 'SOUTHBOUND', 'EASTBOUND', 'WESTBOUND', 'ACCESS ROAD',
-];
+// Abbreviations that can appear anywhere in a name.
+const WORD_ABBREVIATIONS = { MT: 'MOUNT', FT: 'FORT', CRK: 'CREEK', SPGS: 'SPRINGS', HTS: 'HEIGHTS', MTN: 'MOUNTAIN' };
+
+// Trailing words that describe a carriageway rather than a different street.
+const CARRIAGEWAY_WORDS = new Set([
+  'SERVICE', 'FRONTAGE', 'TOLL', 'ACCESS', 'NORTHBOUND', 'SOUTHBOUND', 'EASTBOUND', 'WESTBOUND',
+]);
 
 // Route designations stripped before a highway number: "US Highway 290" -> "290".
 const HIGHWAY_PREFIX = new RegExp(
@@ -32,17 +32,16 @@ const HIGHWAY_PREFIX = new RegExp(
   'HIGHWAY|HWY|LOOP|SPUR)\\s+(\\d+[A-Z]?)$'
 );
 
-const ORDINAL_WORDS = {
-  FIRST: '1ST', SECOND: '2ND', THIRD: '3RD', FOURTH: '4TH', FIFTH: '5TH', SIXTH: '6TH',
-  SEVENTH: '7TH', EIGHTH: '8TH', NINTH: '9TH', TENTH: '10TH', ELEVENTH: '11TH',
-  TWELFTH: '12TH', TWELVETH: '12TH', THIRTEENTH: '13TH', FOURTEENTH: '14TH',
-  FIFTEENTH: '15TH', SIXTEENTH: '16TH', SEVENTEENTH: '17TH', EIGHTEENTH: '18TH',
-  NINETEENTH: '19TH', TWENTIETH: '20TH',
+const ORDINAL_UNITS = {
+  FIRST: 1, SECOND: 2, THIRD: 3, FOURTH: 4, FIFTH: 5, SIXTH: 6, SEVENTH: 7, EIGHTH: 8, NINTH: 9, TENTH: 10,
+  ELEVENTH: 11, TWELFTH: 12, TWELVETH: 12, THIRTEENTH: 13, FOURTEENTH: 14, FIFTEENTH: 15, SIXTEENTH: 16,
+  SEVENTEENTH: 17, EIGHTEENTH: 18, NINETEENTH: 19, TWENTIETH: 20, THIRTIETH: 30, FORTIETH: 40, FIFTIETH: 50,
 };
+const TENS = { TWENTY: 20, THIRTY: 30, FORTY: 40, FIFTY: 50 };
 
 // Common local names, applied to the finished key.
 const ALIASES = {
-  MOPACEXPY: 'MOPAC', LOOP1: 'MOPAC',
+  MOPACEXPRESSWAY: 'MOPAC', LOOP1: 'MOPAC',
   MLK: 'MARTINLUTHERKING', MLKJR: 'MARTINLUTHERKING',
   '360': 'CAPITALOFTEXAS', CAPOFTEXAS: 'CAPITALOFTEXAS',
   CHAVEZ: 'CESARCHAVEZ',
@@ -56,41 +55,59 @@ export const ROUTE_GROUPS = {
   '71': ['71', 'BENWHITE', 'BASTROP'],
 };
 
-function tokens(str) {
-  return str.split(' ').filter(Boolean);
+function ordinal(n) {
+  const rem100 = n % 100;
+  return n + (rem100 >= 11 && rem100 <= 13 ? 'TH' : ({ 1: 'ST', 2: 'ND', 3: 'RD' }[n % 10] || 'TH'));
 }
 
-// A leading direction is part of the name when a street-type word follows it ("West Avenue", "North Loop Blvd"),
-// unless the rest is a route number ("West Highway 71").
-const isLeadingDirection = (t) => {
-  if (t.length < 2 || !DIRECTIONS.has(t[0].toUpperCase())) return false;
-  return !SUFFIXES.has(t[1].toUpperCase()) || HIGHWAY_PREFIX.test(t.slice(1).join(' ').toUpperCase());
-};
-
-export function normalize(name) {
-  if (!name) return '';
-  let s = name.toUpperCase()
+// Uppercases, strips punctuation, and expands abbreviations and number words into a token list.
+function cleanTokens(name) {
+  const s = name.toUpperCase()
     .replace(/\s*(½|1\/2)/g, 'HALF ')
     .replace(/['’.]/g, '')
     .replace(/[^A-Z0-9 ]+/g, ' ')
-    .replace(/\s+/g, ' ')
     .trim();
+  let t = s.split(/\s+/).filter(Boolean);
+  if (!t.length) return t;
 
-  for (const phrase of TRAILING_PHRASES) {
-    if (s.endsWith(' ' + phrase)) s = s.slice(0, -phrase.length - 1);
-  }
+  const isRoadWord = (w) => w === 'ROAD' || w === 'RD';
+  while (t.length > 1 && (CARRIAGEWAY_WORDS.has(t[t.length - 1]) ||
+    (isRoadWord(t[t.length - 1]) && CARRIAGEWAY_WORDS.has(t[t.length - 2])))) t.pop();
 
-  let t = tokens(s);
-  if (DIRECTION_WORDS[t[0]]) t[0] = DIRECTION_WORDS[t[0]];
-  if (t.length > 1 && DIRECTIONS.has(t[t.length - 1])) t.pop();
-  if (isLeadingDirection(t)) t.shift();
-  if (t.length > 1 && SUFFIXES.has(t[t.length - 1])) t.pop();
-  if (t.length > 1 && (t[t.length - 1] === 'JR' || t[t.length - 1] === 'JUNIOR')) t.pop();
+  // Direction letters expand unless they are initials next to another letter ("E M Franklin").
+  const isLetter = (w) => w?.length === 1;
+  t = t.map((w, i) => WORD_ABBREVIATIONS[w] ||
+    (DIRECTION_WORDS[w] && !(isLetter(w) && (isLetter(t[i - 1]) || isLetter(t[i + 1]))) ? DIRECTION_WORDS[w] : w));
   if (t[0] === 'ST' && t.length > 1) t[0] = 'SAINT';
   if ((t[0] === 'AVE' || t[0] === 'AV') && t.length > 1) t[0] = 'AVENUE';
-  if (t.length === 1 && ORDINAL_WORDS[t[0]]) t[0] = ORDINAL_WORDS[t[0]];
+  const last = t.length - 1;
+  if (SUFFIX_WORDS[t[last]] && !(last === 0 && t[0] === 'ST')) t[last] = SUFFIX_WORDS[t[last]];
 
-  s = t.join(' ');
+  // Number words: "Sixth" -> 6TH, "Twenty Sixth" -> 26TH.
+  for (let i = 0; i < t.length; i++) {
+    if (TENS[t[i]] && ORDINAL_UNITS[t[i + 1]] < 10) t.splice(i, 2, ordinal(TENS[t[i]] + ORDINAL_UNITS[t[i + 1]]));
+    else if (ORDINAL_UNITS[t[i]]) t[i] = ordinal(ORDINAL_UNITS[t[i]]);
+  }
+  return t;
+}
+
+const isRoute = (t) => HIGHWAY_PREFIX.test(t.join(' '));
+
+// A leading direction is a prefix ("South Lamar") unless a street-type word follows it ("West Avenue",
+// "North Loop Blvd"); before a route number it is always a prefix ("West Highway 71").
+function hasLeadingDirection(t) {
+  if (t.length < 2 || !DIRECTIONS.has(t[0])) return false;
+  return !SUFFIXES.has(t[1]) || isRoute(t.slice(1));
+}
+
+// A trailing direction is a suffix ("Ranch Road 620 North") unless only a street-type word precedes it ("Avenue N").
+function hasTrailingDirection(t) {
+  if (t.length < 2 || !DIRECTIONS.has(t[t.length - 1])) return false;
+  return !(t.length === 2 && (SUFFIXES.has(t[0]) || t[0] === 'AVENUE'));
+}
+
+function finishKey(t) {
+  const s = t.join(' ');
   const full = s.replace(/ /g, '');
   if (ALIASES[full]) return ALIASES[full];
   const hwy = s.match(HIGHWAY_PREFIX);
@@ -98,34 +115,120 @@ export function normalize(name) {
   return ALIASES[key] || key;
 }
 
-// Human-readable name for a street: drops the directional prefix and carriageway phrases.
-export function displayName(name) {
-  let s = name.trim();
-  for (const phrase of TRAILING_PHRASES) {
-    const re = new RegExp('\\s+' + phrase.replace(/ /g, '\\s+') + '$', 'i');
-    s = s.replace(re, '');
-  }
-  const t = tokens(s);
-  if (isLeadingDirection(t)) t.shift();
-  return t.join(' ');
+// Name tokens with direction prefixes/suffixes removed. keepSuffix keeps the street-type word ("Cat Hollow"
+// stays CAT HOLLOW, not CAT); keepTrailingDirection keeps a final direction ("Collinwood West");
+// keepLeadingDirection keeps a first one ("West Gate Blvd" -> WEST GATE).
+function nameTokens(name, { keepSuffix = false, keepTrailingDirection = false, keepLeadingDirection = false } = {}) {
+  const t = cleanTokens(name);
+  if (!keepTrailingDirection && hasTrailingDirection(t)) t.pop();
+  if (!keepLeadingDirection && hasLeadingDirection(t)) t.shift();
+  if (!keepSuffix && t.length > 1 && SUFFIXES.has(t[t.length - 1]) && !isRoute(t)) t.pop();
+  if (t.length > 1 && (t[t.length - 1] === 'JR' || t[t.length - 1] === 'JUNIOR')) t.pop();
+  return t;
 }
 
-// Keys to try for a typed guess, in order: the key itself, then bare numbers as ordinals ("6" -> "6TH").
+// The matching key.
+export function normalize(name, options) {
+  return name ? finishKey(nameTokens(name, options)) : '';
+}
+
+// A full name in canonical form, spaces kept: "W Oak Blvd" and "West Oak Boulevard" match, "Oaklane" does not.
+export function canonicalName(name) {
+  return name ? cleanTokens(name).join(' ') : '';
+}
+
+// The street-type word a name ends with ("Gate Way" -> WAY), else ''.
+export function streetType(name) {
+  const t = cleanTokens(name);
+  if (hasTrailingDirection(t)) t.pop();
+  return t.length > 1 && SUFFIXES.has(t[t.length - 1]) ? t[t.length - 1] : '';
+}
+
+// The leading direction word of a name if it is a prefix, else ''.
+export function leadingDirection(name) {
+  const t = cleanTokens(name);
+  return hasLeadingDirection(t) ? t[0] : '';
+}
+
+// Builds the key function for a whole set of street names. A leading direction is usually an address prefix
+// ("South Lamar"), but it is part of the name when the only other street with that base name has a different
+// street type ("West Gate Blvd" vs "Gate Way").
+export function createStreetKey(names) {
+  const bases = new Map();
+  for (const name of names) {
+    const base = normalize(name);
+    if (!bases.has(base)) bases.set(base, { directions: new Set(), directedTypes: new Set(), bareTypes: new Set() });
+    const info = bases.get(base);
+    const dir = leadingDirection(name);
+    if (dir) {
+      info.directions.add(dir);
+      info.directedTypes.add(streetType(name));
+    } else {
+      info.bareTypes.add(streetType(name));
+    }
+  }
+  const partOfName = new Set();
+  for (const [base, info] of bases) {
+    const overlap = [...info.directedTypes].some((type) => info.bareTypes.has(type));
+    if (!/^\d/.test(base) && info.directions.size === 1 && info.bareTypes.size > 0 && !overlap) partOfName.add(base);
+  }
+  return (name) => {
+    const base = normalize(name);
+    return partOfName.has(base) && leadingDirection(name) ? normalize(name, { keepLeadingDirection: true }) : base;
+  };
+}
+
+// The trailing direction word of a name if it is a suffix ("Meadows Drive North"), else ''.
+export function trailingDirection(name) {
+  const t = cleanTokens(name);
+  return hasTrailingDirection(t) ? t[t.length - 1] : '';
+}
+
+// Human-readable name: drops carriageway words, the directional prefix unless keepDirection, and the
+// directional suffix with dropTrailingDirection.
+export function displayName(name, { keepDirection = false, dropTrailingDirection = false } = {}) {
+  const words = name.trim().split(/\s+/);
+  while (words.length > 1 && (CARRIAGEWAY_WORDS.has(words[words.length - 1].toUpperCase()) ||
+    (/^(road|rd)$/i.test(words[words.length - 1]) && CARRIAGEWAY_WORDS.has(words[words.length - 2].toUpperCase())))) {
+    words.pop();
+  }
+  if (dropTrailingDirection && trailingDirection(words.join(' '))) words.pop();
+  if (!keepDirection && leadingDirection(words.join(' '))) words.shift();
+  return words.join(' ');
+}
+
+// Keys to try for a typed guess, most specific first.
 export function candidateKeys(input) {
   const key = normalize(input);
   if (!key) return [];
-  const keys = [key];
-  // "North Loop" may be the whole name (North Loop Blvd) or a street named North; try the whole name first.
-  const words = tokens(input.toUpperCase().replace(/[^A-Z0-9 ]+/g, ' '));
-  if (words.length === 2 && DIRECTIONS.has(words[0]) && SUFFIXES.has(words[1])) {
-    keys.unshift((DIRECTION_WORDS[words[0]] || words[0]) + words[1]);
-    keys.push(normalize(words[1]));
-  }
-  if (/^\d+$/.test(key)) {
-    const n = Number(key);
-    const rem100 = n % 100;
-    const suffix = rem100 >= 11 && rem100 <= 13 ? 'TH' : ({ 1: 'ST', 2: 'ND', 3: 'RD' }[n % 10] || 'TH');
-    keys.push(key + suffix);
-  }
-  return keys;
+  const keys = [
+    normalize(input, { keepSuffix: true, keepTrailingDirection: true, keepLeadingDirection: true }),
+    normalize(input, { keepSuffix: true, keepTrailingDirection: true }),
+    normalize(input, { keepLeadingDirection: true }),
+    normalize(input, { keepSuffix: true }),
+    normalize(input, { keepTrailingDirection: true }),
+    key,
+  ];
+
+  // A leading letter read as a direction even beside an initial: "E O Dell" -> East O Dell.
+  const first = input.trim().split(/\s+/)[0]?.toUpperCase();
+  if (DIRECTION_WORDS[first]) keys.push(normalize(DIRECTION_WORDS[first] + input.trim().slice(first.length)));
+
+  // Bare numbers as ordinals: "6" -> 6TH.
+  if (/^\d+$/.test(key)) keys.push(ordinal(Number(key)));
+
+  // A direction glued to the name: "Westgate" -> West Gate.
+  const glued = [...DIRECTIONS].sort((a, b) => b.length - a.length).find((d) => key.startsWith(d) && key.length > d.length);
+  if (glued) keys.push(normalize(`${glued} ${input.trim().slice(glued.length)}`));
+
+  return [...new Set(keys)];
+}
+
+// The key a typed guess names: a route group, or the first candidate that is a street. `exact` maps a
+// canonical full name to its own key where it collides with a longer street's key ("Breezy Pass" vs
+// "Breezy Pass Cove").
+export function matchKey(input, hasKey, exact = {}) {
+  const own = exact[canonicalName(input)];
+  if (own && hasKey(own)) return own;
+  return candidateKeys(input).find((key) => ROUTE_GROUPS[key] || hasKey(key)) ?? null;
 }
