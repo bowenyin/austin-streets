@@ -1,15 +1,15 @@
 :root {
   --panel-w: 360px;
 
-  /* Palette: base (map), primary (sidebar), secondary (named streets + highlights). */
+  /* Palette: base (map), primary (sidebar and panels), secondary (named streets + highlights). */
   --base: #0B1020;
   --base-raised: #151C36;
   --water: #060A16;
   --park: #10192F;
   --street: #26304F;
   --boundary: #34406A;
-  --primary: #2B4BFF;
-  --primary-deep: #1E38D6;
+  --primary: #141C3A;
+  --primary-deep: #0F1630;
   --secondary: #FFE14D;
   --on-secondary: #0B1020;
 
@@ -43,17 +43,18 @@ button { font: inherit; color: inherit; cursor: pointer; }
   display: flex;
   flex-direction: column;
   background: var(--primary);
+  border-left: var(--bp-hair) solid rgba(255, 255, 255, 0.08);
   font-size: 14px;
 
-  /* White-on-cobalt text and rule ramp for everything inside the sidebar. */
+  /* Light-on-dark text and rule ramp for everything inside the sidebar. */
   --bp-ink: #FFFFFF;
   --bp-ink-2: rgba(255, 255, 255, 0.82);
   --bp-ink-3: rgba(255, 255, 255, 0.66);
-  --bp-rule: rgba(255, 255, 255, 0.22);
-  --bp-rule-soft: rgba(255, 255, 255, 0.16);
-  --bp-rule-hard: rgba(255, 255, 255, 0.45);
-  --bp-hover-1: rgba(255, 255, 255, 0.08);
-  --bp-hover-2: rgba(255, 255, 255, 0.14);
+  --bp-rule: rgba(255, 255, 255, 0.12);
+  --bp-rule-soft: rgba(255, 255, 255, 0.08);
+  --bp-rule-hard: rgba(255, 255, 255, 0.28);
+  --bp-hover-1: rgba(255, 255, 255, 0.05);
+  --bp-hover-2: rgba(255, 255, 255, 0.10);
   color: var(--bp-ink);
 }
 
@@ -181,7 +182,7 @@ h1 {
 .transfer {
   width: min(440px, calc(100vw - 32px));
   padding: 0;
-  border: 0;
+  border: var(--bp-hair) solid rgba(255, 255, 255, 0.12);
   border-radius: var(--bp-r-2);
   background: var(--primary);
   box-shadow: none;
@@ -265,10 +266,9 @@ h1 {
   transform: translateX(-50%);
   width: min(520px, calc(100vw - var(--panel-w) - 32px));
   margin: 0;
-  border: 3px solid var(--base);
+  border: var(--bp-hair) solid rgba(255, 255, 255, 0.22);
   border-radius: var(--bp-r-2);
-  background: #FFFFFF;
-  box-shadow: 0 0 0 2px var(--primary);
+  background: var(--primary);
 }
 
 .guess input {
@@ -283,12 +283,12 @@ h1 {
   font-weight: 700;
   letter-spacing: -0.01em;
   text-align: center;
-  color: var(--base);
-  caret-color: var(--primary);
+  color: #FFFFFF;
+  caret-color: var(--secondary);
   outline: none;
 }
-.guess input::placeholder { color: #7A8099; font-family: var(--bp-text); font-size: 19px; font-weight: 400; letter-spacing: 0; }
-.guess:focus-within { box-shadow: 0 0 0 3px var(--secondary); }
+.guess input::placeholder { color: rgba(255, 255, 255, 0.55); font-family: var(--bp-text); font-size: 19px; font-weight: 400; letter-spacing: 0; }
+.guess:focus-within { border-color: var(--secondary); }
 
 .feedback {
   position: absolute;
