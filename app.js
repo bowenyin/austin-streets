@@ -442,15 +442,19 @@ async function restoreFromHash() {
   flash(`Added ${plural(mergeKeys(fresh))}`);
 }
 
-// Keeps the phone's bottom input bar above the on-screen keyboard. iOS overlays the keyboard on fixed
-// elements, so --kb is set to the height the visual viewport loses at the bottom (0 when the browser already
-// resizes the page, as Android does with interactive-widget=resizes-content).
+// Pins the phone's top strip and bottom input bar to the visible area when the on-screen keyboard opens.
+// iOS overlays the keyboard and pans the page up instead of resizing it, so the visual viewport's top offset
+// (--vv-top), visible height (--vv-height), and the height hidden below it (--kb) are mirrored into CSS.
+// Android resizes the page itself (interactive-widget=resizes-content), leaving the offsets at 0.
 function trackKeyboard() {
   const vv = window.visualViewport;
   if (!vv) return;
+  const root = document.documentElement.style;
   const update = () => {
     const covered = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-    document.documentElement.style.setProperty('--kb', `${Math.round(covered)}px`);
+    root.setProperty('--vv-top', `${Math.round(vv.offsetTop)}px`);
+    root.setProperty('--vv-height', `${Math.round(vv.height)}px`);
+    root.setProperty('--kb', `${Math.round(covered)}px`);
   };
   vv.addEventListener('resize', update);
   vv.addEventListener('scroll', update);

@@ -377,7 +377,7 @@ h1 {
 @media (max-width: 720px) {
   /* Phones: the score is a strip at the top that drops down to show stats and the list; the guess input is
      a bar at the bottom that rides above the on-screen keyboard (--kb, set from the visual viewport). */
-  :root { --sheet-peek: 72px; --bottombar: 66px; --kb: 0px; }
+  :root { --sheet-peek: 72px; --bottombar: 66px; --kb: 0px; --vv-top: 0px; --vv-height: 100vh; }
 
   body::before {
     content: "";
@@ -406,7 +406,7 @@ h1 {
   .feedback { font-size: 16px; }
 
   #panel {
-    top: 0; bottom: auto;
+    top: var(--vv-top); bottom: auto;
     width: 100%;
     height: var(--sheet-peek);
     overflow: hidden;
@@ -415,7 +415,7 @@ h1 {
     z-index: 2;
     transition: height var(--bp-dur-3) var(--bp-ease);
   }
-  #panel.open { height: min(70vh, calc(100% - var(--bottombar) - var(--kb) - 16px)); }
+  #panel.open { height: min(70vh, calc(var(--vv-height) - var(--bottombar) - 16px)); }
 
   /* The score strip is the toggle; the grabber sits on the panel's lower edge. */
   .sheet-handle {
