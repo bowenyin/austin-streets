@@ -12,6 +12,7 @@
   --primary-deep: #0F1630;
   --secondary: #7CC4FF;
   --on-secondary: #0B1020;
+  --highlight: #FFE14D;
 
   --found: var(--secondary);
 }

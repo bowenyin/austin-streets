@@ -117,18 +117,18 @@ function addLayers(background) {
     paint: { 'line-color': css('--street'), 'line-width': lineWidth(0.6, 1.4, 6) },
   });
   map.addLayer({
-    id: 'named-hover', type: 'line', source: 'named',
-    layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: {
-      'line-color': '#FFFFFF',
-      'line-width': lineWidth(3, 7, 24),
-      'line-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 1, 0],
-    },
-  });
-  map.addLayer({
     id: 'named', type: 'line', source: 'named',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
     paint: { 'line-color': accent, 'line-width': lineWidth(1, 3, 14) },
+  });
+  map.addLayer({
+    id: 'named-hover', type: 'line', source: 'named',
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: {
+      'line-color': css('--highlight'),
+      'line-width': lineWidth(2, 5, 18),
+      'line-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 1, 0],
+    },
   });
   map.addLayer({
     id: 'named-labels', type: 'symbol', source: 'named', minzoom: 12,
