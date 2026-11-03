@@ -302,13 +302,14 @@ h1 {
   font-family: var(--bp-display);
   font-size: 28px;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   text-align: center;
   color: #FFFFFF;
   caret-color: var(--secondary);
   outline: none;
 }
-.guess input::placeholder { color: rgba(255, 255, 255, 0.55); font-family: var(--bp-text); font-size: 19px; font-weight: 400; letter-spacing: 0; }
+.guess input::placeholder { color: rgba(255, 255, 255, 0.55); font-family: var(--bp-text); font-size: 19px; font-weight: 500; letter-spacing: 0.06em; }
 .guess:focus-within { border-color: var(--secondary); }
 
 .feedback {
