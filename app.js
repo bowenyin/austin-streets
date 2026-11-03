@@ -13,6 +13,7 @@ const els = {
   labels: $('labels-toggle'), reset: $('reset'), panel: $('panel'), sheetToggle: $('sheet-toggle'),
   transfer: $('transfer'), dialog: $('transfer-dialog'), copyLink: $('copy-link'), copyCode: $('copy-code'),
   restoreInput: $('restore-input'), restore: $('restore'), transferStatus: $('transfer-status'),
+  resetDialog: $('reset-dialog'),
 };
 
 const state = {
@@ -320,7 +321,12 @@ function bindUI() {
   });
 
   els.reset.addEventListener('click', () => {
-    if (!state.named.length || !confirm('Clear every street you have named?')) return;
+    if (!state.named.length) return;
+    els.resetDialog.returnValue = '';
+    els.resetDialog.showModal();
+  });
+  els.resetDialog.addEventListener('close', () => {
+    if (els.resetDialog.returnValue !== 'reset') return;
     state.named = [];
     save();
     setHover(null);

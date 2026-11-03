@@ -83,6 +83,16 @@
       <p id="transfer-status" class="transfer-status" role="status"></p>
     </dialog>
 
+    <dialog id="reset-dialog" class="transfer confirm" aria-labelledby="reset-title">
+      <form method="dialog">
+        <h2 id="reset-title">Reset all progress?</h2>
+        <div class="transfer-buttons">
+          <button value="cancel" class="ghost" autofocus>Cancel</button>
+          <button value="reset" class="danger">Reset</button>
+        </div>
+      </form>
+    </dialog>
+
     <div id="tooltip" class="tooltip" hidden></div>
     <div id="loading" class="loading">Loading streets…</div>
 

@@ -254,6 +254,28 @@ h1 {
 }
 .primary:hover { opacity: 0.88; }
 
+.confirm { width: min(340px, calc(100vw - 32px)); }
+.confirm form { margin: 0; padding: var(--bp-5); }
+.confirm h2 {
+  margin: 0 0 var(--bp-5);
+  font-family: var(--bp-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: var(--bp-tr-head);
+}
+.confirm .transfer-buttons { justify-content: flex-end; }
+
+.danger {
+  border: var(--bp-hair) solid #FF6B6B;
+  border-radius: var(--bp-r-1);
+  background: #FF6B6B;
+  color: var(--on-secondary);
+  padding: 6px 14px;
+  font-weight: 600;
+  transition: opacity var(--bp-dur-1) var(--bp-ease);
+}
+.danger:hover { opacity: 0.88; }
+
 .transfer-status { margin: 0; padding: var(--bp-3) var(--bp-5); min-height: 1.45em; color: var(--bp-ink-2); }
 .transfer-status:empty { display: none; }
 
