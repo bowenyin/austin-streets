@@ -148,6 +148,77 @@ h1 {
 }
 .ghost:hover { background: var(--bp-hover-2); color: var(--bp-ink); }
 
+.foot-actions { display: flex; gap: var(--bp-2); }
+
+/* ---------- transfer dialog ---------- */
+
+.transfer {
+  width: min(440px, calc(100vw - 32px));
+  padding: 0;
+  border-radius: var(--bp-r-1);
+  color: var(--bp-ink);
+}
+.transfer::backdrop { background: rgba(0, 0, 0, 0.55); }
+
+.transfer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  padding: var(--bp-4) var(--bp-5);
+  border-bottom: var(--bp-hair) solid var(--bp-rule-soft);
+}
+.transfer-head h2 {
+  margin: 0;
+  font-family: var(--bp-display);
+  font-size: 20px;
+  font-weight: var(--bp-w-head);
+  letter-spacing: var(--bp-tr-head);
+}
+.transfer .close {
+  border: 0;
+  background: transparent;
+  padding: 4px 8px;
+  color: var(--bp-ink-3);
+  font-size: 16px;
+}
+.transfer .close:hover { color: var(--bp-ink); }
+
+.transfer-section { padding: var(--bp-4) var(--bp-5); border-bottom: var(--bp-hair) solid var(--bp-rule-soft); }
+.transfer-section p { margin: var(--bp-2) 0 var(--bp-3); color: var(--bp-ink-2); }
+
+.transfer-buttons { display: flex; gap: var(--bp-2); }
+
+.transfer textarea {
+  display: block;
+  width: 100%;
+  margin-bottom: var(--bp-3);
+  padding: 10px 12px;
+  border: var(--bp-hair) solid var(--bp-rule-hard);
+  border-radius: var(--bp-r-1);
+  background: var(--bp-inset);
+  color: var(--bp-ink);
+  font: inherit;
+  font-size: 14px;
+  resize: vertical;
+  outline: none;
+}
+.transfer textarea:focus { border-color: var(--bp-ink-2); }
+
+.primary {
+  border: var(--bp-hair) solid var(--bp-invert);
+  border-radius: var(--bp-r-1);
+  background: var(--bp-invert);
+  color: var(--bp-ink-inv);
+  padding: 6px 14px;
+  font-weight: var(--bp-w-strong);
+  transition: opacity var(--bp-dur-1) var(--bp-ease);
+}
+.primary:hover { opacity: 0.88; }
+
+.transfer-status { margin: 0; padding: var(--bp-3) var(--bp-5); min-height: 1.45em; color: var(--bp-ink-2); }
+.transfer-status:empty { display: none; }
+
 /* ---------- guess input ---------- */
 
 .guess {

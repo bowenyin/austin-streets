@@ -1,6 +1,6 @@
 # Name Austin Streets
 
-How much of Austin's street network can you name from memory? Type a street name and press Return; matching streets light up on the map, and your score is the share of total street miles you've named. Progress is saved in your browser.
+How much of Austin's street network can you name from memory? Type a street name and press Return; matching streets light up on the map, and your score is the share of total street miles you've named. Progress is saved in your browser; use **Transfer** to copy a link or code that restores it on another device. The code is a compressed list of street keys (`progress-code.js`), and a link carries it after `#p=`, so it never reaches the server.
 
 Inspired by [Name SF Streets](https://carvin.github.io/sf-street-names/).
 

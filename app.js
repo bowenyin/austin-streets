@@ -1,4 +1,5 @@
 import { candidateKeys } from './normalize.js';
+import { encodeProgress, decodeProgress } from './progress-code.js';
 
 const STORAGE_KEY = 'austin-streets:named';
 const AUSTIN_BOUNDS = [[-97.94, 30.098], [-97.56, 30.517]];
@@ -10,6 +11,8 @@ const els = {
   list: $('list'), empty: $('empty'), input: $('guess-input'), form: $('guess'),
   feedback: $('feedback'), tooltip: $('tooltip'), loading: $('loading'),
   labels: $('labels-toggle'), reset: $('reset'), panel: $('panel'), sheetToggle: $('sheet-toggle'),
+  transfer: $('transfer'), dialog: $('transfer-dialog'), copyLink: $('copy-link'), copyCode: $('copy-code'),
+  restoreInput: $('restore-input'), restore: $('restore'), transferStatus: $('transfer-status'),
 };
 
 const state = {
@@ -330,6 +333,89 @@ function bindUI() {
   });
 }
 
+// ---------- transfer ----------
+
+const namedKeys = () => state.named.map((i) => state.streets[i].k);
+
+// Adds streets from a list of keys to the current progress. Returns how many were new.
+function mergeKeys(keys) {
+  const before = state.named.length;
+  for (const k of keys) {
+    const i = state.byKey.get(k);
+    if (i !== undefined && !state.named.includes(i)) state.named.push(i);
+  }
+  const added = state.named.length - before;
+  if (added) {
+    save();
+    render();
+  }
+  return added;
+}
+
+const plural = (n) => `${n.toLocaleString()} ${n === 1 ? 'street' : 'streets'}`;
+
+async function shareLink() {
+  const url = new URL(location.href);
+  url.hash = 'p=' + (await encodeProgress(namedKeys()));
+  return url.toString();
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function bindTransfer() {
+  const status = (msg) => { els.transferStatus.textContent = msg; };
+
+  els.transfer.addEventListener('click', () => {
+    status('');
+    els.restoreInput.value = '';
+    els.dialog.showModal();
+  });
+
+  const copy = async (asLink) => {
+    if (!state.named.length) return status('Name a street first.');
+    const text = asLink ? await shareLink() : await encodeProgress(namedKeys());
+    if (await copyText(text)) {
+      status(`Copied ${asLink ? 'a link' : 'a code'} for ${plural(state.named.length)}.`);
+    } else {
+      els.restoreInput.value = text;
+      els.restoreInput.select();
+      status('Copying was blocked. The text is selected below; copy it manually.');
+    }
+  };
+  els.copyLink.addEventListener('click', () => copy(true));
+  els.copyCode.addEventListener('click', () => copy(false));
+
+  els.restore.addEventListener('click', async () => {
+    const keys = await decodeProgress(els.restoreInput.value);
+    if (!keys) return status("That isn't a valid link or code.");
+    const added = mergeKeys(keys);
+    status(added ? `Added ${plural(added)}.` : 'No new streets in that code.');
+    if (added) els.restoreInput.value = '';
+  });
+}
+
+// Restores progress from a share link (#p=...) and then removes the code from the address bar.
+async function restoreFromHash() {
+  if (!location.hash.startsWith('#p=')) return;
+  const keys = await decodeProgress(location.hash);
+  history.replaceState(null, '', location.pathname + location.search);
+  if (!keys) return flash("That progress link isn't valid");
+  const fresh = keys.filter((k) => {
+    const i = state.byKey.get(k);
+    return i !== undefined && !state.named.includes(i);
+  });
+  if (!fresh.length) return flash('No new streets in that link');
+  if (!confirm(`Add ${plural(fresh.length)} from this link to your progress?`)) return;
+  flash(`Added ${plural(mergeKeys(fresh))}`);
+}
+
 // ---------- start ----------
 
 async function start() {
@@ -350,7 +436,9 @@ async function start() {
   addLayers(background);
   bindMapHover();
   bindUI();
+  bindTransfer();
   render();
+  await restoreFromHash();
 
   els.loading.hidden = true;
   els.input.disabled = false;

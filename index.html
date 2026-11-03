@@ -46,7 +46,10 @@
 
       <footer class="panel-foot">
         <label class="toggle"><input type="checkbox" id="labels-toggle" checked> Street labels</label>
-        <button id="reset" class="ghost">Reset</button>
+        <div class="foot-actions">
+          <button id="transfer" class="ghost">Transfer</button>
+          <button id="reset" class="ghost">Reset</button>
+        </div>
       </footer>
     </aside>
 
@@ -55,6 +58,30 @@
              autocapitalize="words" spellcheck="false" enterkeyhint="go" disabled>
       <p id="feedback" class="feedback" role="status"></p>
     </form>
+
+    <dialog id="transfer-dialog" class="transfer bp-lift" aria-labelledby="transfer-title">
+      <form method="dialog" class="transfer-head">
+        <h2 id="transfer-title">Transfer progress</h2>
+        <button class="close" aria-label="Close">✕</button>
+      </form>
+      <section class="transfer-section">
+        <h3 class="eyebrow">Save</h3>
+        <p>Open the link on another device, or keep the code as a backup.</p>
+        <div class="transfer-buttons">
+          <button id="copy-link" class="primary">Copy link</button>
+          <button id="copy-code" class="ghost">Copy code</button>
+        </div>
+      </section>
+      <section class="transfer-section">
+        <h3 class="eyebrow">Restore</h3>
+        <p>Paste a link or code. Streets in it are added to the ones you've already named.</p>
+        <textarea id="restore-input" rows="3" spellcheck="false" placeholder="Paste a link or code"></textarea>
+        <div class="transfer-buttons">
+          <button id="restore" class="primary">Restore</button>
+        </div>
+      </section>
+      <p id="transfer-status" class="transfer-status" role="status"></p>
+    </dialog>
 
     <div id="tooltip" class="tooltip" hidden></div>
     <div id="loading" class="loading">Loading streets…</div>
